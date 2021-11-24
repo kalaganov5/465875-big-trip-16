@@ -1,7 +1,7 @@
 # Проект «Большое путешествие»
 
 * Студент: [Vladimir Kalaganov](https://up.htmlacademy.ru/ecmascript/16/user/465875).
-* Наставник: `Неизвестно`.
+* Наставник: [Александра Яковина](https://htmlacademy.ru/profile/sashayakovyna).
 
 ---
 
