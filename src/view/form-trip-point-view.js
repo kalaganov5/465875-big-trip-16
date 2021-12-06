@@ -115,6 +115,11 @@ const setInfo = (description, images) => {
   </section>`;
 };
 
+/**
+ *
+ * @param {Object} routePoint данные о точке маршрута
+ * @returns заполненная форма создания или редактирования точки маршрута
+ */
 export const createFormPointTemplate = (routePoint) => {
   const {timeStart, timeEnd, type, destination, price, offers, info} = routePoint;
   return `<li class="trip-events__item">
