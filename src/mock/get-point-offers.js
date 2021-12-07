@@ -1,4 +1,4 @@
-import {getRandomInteger, getRandomItemArray} from './utils.js';
+import {getRandomInteger} from './utils.js';
 const PRICE_MIN = 5;
 const PRICE_MAX = 100;
 const offers = {}; // заполняется динамически: ключ = [{},{}]
@@ -34,28 +34,8 @@ const getPointOffers = () => {
       isSelect: Boolean(getRandomInteger(0, 1)),
     }
   ];
-  const offerLength = getRandomInteger(0, offersItem.length - 1);
-  const pointOffersUnique = [];
-  // Заполнение массива уникальными опциями
-  while (pointOffersUnique.length < offerLength) {
-    const randomItem = getRandomItemArray(offersItem);
-
-    const checkIsUniqueOffer = () => {
-      for (const pointOffer of pointOffersUnique) {
-        if (pointOffer.title === randomItem.title) {
-          return false;
-        }
-      }
-
-      return true;
-    };
-
-    if (checkIsUniqueOffer()) {
-      pointOffersUnique.push(randomItem);
-    }
-  }
-
-  return pointOffersUnique;
+  const offersLength = getRandomInteger(0, offersItem.length - 1);
+  return offersItem.splice(0, offersLength);
 };
 
 /**
