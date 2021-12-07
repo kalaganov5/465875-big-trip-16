@@ -1,11 +1,12 @@
 import {getRandomInteger, getRandomItemArray} from './utils.js';
+const offers = {}; // заполняется динамически: ключ = [{},{}]
 
 /**
  *
  * @returns набор уникальных опций для точки маршрута
  */
-export const getPointOffers = () => {
-  const pointOffers = [
+const getPointOffers = () => {
+  const offersItem = [
     {
       title: 'Switch to comfort class',
       price: getRandomInteger(50, 100),
@@ -31,10 +32,11 @@ export const getPointOffers = () => {
       isSelect: Boolean(getRandomInteger(0,1)),
     }
   ];
-  const offerLength = getRandomInteger(0, pointOffers.length - 1);
+  const offerLength = getRandomInteger(0, offersItem.length - 1);
   const pointOffersUnique = [];
+  // Заполнение массива уникальными опциями
   while (pointOffersUnique.length < offerLength) {
-    const randomItem = getRandomItemArray(pointOffers);
+    const randomItem = getRandomItemArray(offersItem);
 
     const checkIsUniqueOffer = () => {
       for (const pointOffer of pointOffersUnique) {
@@ -52,4 +54,18 @@ export const getPointOffers = () => {
   }
 
   return pointOffersUnique;
+};
+
+/**
+ *
+ * @param {string} type тип точки маршрута
+ * @returns массив из уникальных опций для точки маршрута
+ */
+export const setOffers = (type) => {
+  if (type in offers) {
+    return offers[type];
+  }
+
+  offers[type] = getPointOffers();
+  return offers[type];
 };

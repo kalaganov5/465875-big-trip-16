@@ -1,6 +1,6 @@
 import {ROUTE_TYPE, ROUTE_CITIES, ROUTE_DESCRIPTION} from './const.js';
 import {getRandomInteger, getRandomItemArray} from './utils.js';
-import {getPointOffers} from './get-point-offers.js';
+import {setOffers} from './get-point-offers.js';
 import dayjs from 'dayjs';
 
 /**
@@ -44,15 +44,20 @@ const getRandomDateTime = (start = 0, end = 7) => (
     .toDate()
 );
 
-export const getRoutePoint = () => (
+/**
+ *
+ * @param {string} type тип точки маршрута, значение задано по умолчанию и передавать не нужно
+ * @returns объект точки маршрута
+ */
+export const getRoutePoint = (type = getRandomItemArray(ROUTE_TYPE)) => (
   {
     destination: getRandomItemArray(ROUTE_CITIES),
-    type: getRandomItemArray(ROUTE_TYPE),
+    type: type,
     info: {
       description: getRandomDescriptions(ROUTE_DESCRIPTION),
       photos: getPhotos(),
     },
-    offers: getPointOffers(),
+    offers: setOffers(type),
     price: getRandomInteger(20, 300),
     isFavorite: Boolean(getRandomInteger(0, 1)),
     timeStart: getRandomDateTime(0, 1),
