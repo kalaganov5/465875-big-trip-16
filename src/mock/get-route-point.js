@@ -3,6 +3,14 @@ import {getRandomInteger, getRandomItemArray} from './utils.js';
 import {setOffers} from './get-point-offers.js';
 import dayjs from 'dayjs';
 
+const PHOTOS_NUMBER = 10;
+const HOUR_IN_DAY = 24;
+const MINUTE_IN_HOUR = 60;
+const PRICE_OFFER_MIN = 20;
+const PRICE_OFFER_MAX = 300;
+const DAY_GAP_MIN = 1;
+const DAY_GAP_MAX = 3;
+
 /**
  *
  * @param {Array} array массив из описаний
@@ -21,7 +29,7 @@ const getRandomDescriptions = (array) => {
  * @returns массив фотографий
  */
 const getPhotos = () => {
-  const photosLength = getRandomInteger(1, 10);
+  const photosLength = getRandomInteger(1, PHOTOS_NUMBER);
   const photos = [];
 
   for (let i = 0; i < photosLength; i++) {
@@ -38,8 +46,8 @@ const getPhotos = () => {
  */
 const getRandomDateTime = (start = 0, end = 7) => (
   dayjs()
-    .add(getRandomInteger(0, 24), 'hour')
-    .add(getRandomInteger(0, 60), 'minute')
+    .add(getRandomInteger(0, HOUR_IN_DAY), 'hour')
+    .add(getRandomInteger(0, MINUTE_IN_HOUR), 'minute')
     .add(getRandomInteger(start, end), 'day')
     .toDate()
 );
@@ -58,9 +66,9 @@ export const getRoutePoint = (type = getRandomItemArray(ROUTE_TYPE)) => (
       photos: getPhotos(),
     },
     offers: setOffers(type),
-    price: getRandomInteger(20, 300),
+    price: getRandomInteger(PRICE_OFFER_MIN, PRICE_OFFER_MAX),
     isFavorite: Boolean(getRandomInteger(0, 1)),
-    timeStart: getRandomDateTime(0, 1),
-    timeEnd: getRandomDateTime(2, 3),
+    timeStart: getRandomDateTime(0, DAY_GAP_MIN),
+    timeEnd: getRandomDateTime(DAY_GAP_MIN + 1, DAY_GAP_MAX),
   }
 );
