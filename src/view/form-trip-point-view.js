@@ -67,19 +67,22 @@ const setOffersCreatePoint = (offers) => {
   if (offers.length === 0) {
     return '';
   }
-  const offerMarkup = [];
-  for (let i = 0; i < offers.length; i++) {
-    const offerElement = `
-    <div class="event__offer-selector">
-      <input class="event__offer-checkbox  visually-hidden" id="event-offer-${i}" type="checkbox" name="event-offer-${offers[i].title.toLowerCase().replaceAll(' ', '-')}" ${offers[i].isSelect ? 'checked' : ''}>
-      <label class="event__offer-label" for="event-offer-${i}">
-        <span class="event__offer-title">${offers[i].title}</span>
+
+  const offerMarkup = Array.from({length: offers.length}, (_, index) => (
+    `<div class="event__offer-selector">
+      <input class="event__offer-checkbox  visually-hidden"
+        id="event-offers[index]-${index}"
+        type="checkbox"
+        name="event-offers[index]-${offers[index].title.toLowerCase().replaceAll(' ', '-')}"
+        ${offers[index].isSelect ? 'checked' : ''}>
+      <label class="event__offer-label" for="event-offers[index]-${index}">
+        <span class="event__offer-title">${offers[index].title}</span>
         &plus;&euro;&nbsp;
-        <span class="event__offer-price">${offers[i].price}</span>
+        <span class="event__offer-price">${offers[index].price}</span>
       </label>
-    </div>`;
-    offerMarkup.push(offerElement);
-  }
+    </div>`)
+  );
+
   return `
   <section class="event__section  event__section--offers">
   <h3 class="event__section-title  event__section-title--offers">Offers</h3>
