@@ -1,0 +1,62 @@
+import dayjs from 'dayjs';
+
+/**
+ *
+ * @param {object} date объект дата и время
+ * @param {string} format формат даты и времени строкой. Пример 'DD/MM/YYYY') итог '25/01/2019'
+ */
+export const humanReadableDate = (date, format = 'DD/MM/YYYY') => (dayjs(date).format(format));
+
+/**
+ *
+ * @param {number} number число
+ * @returns поставит ведущий ноль если число менее или равно 9
+ */
+const createLeadingZero = (number) => (number <= 9 ? `0${number}` : number);
+
+/**
+ *
+ * @param {object} dateA дата начала
+ * @param {object} dateB дата окончания
+ * @returns объект {day, hour, minute}
+ */
+export const calculateDate = (dateA, dateB) => {
+  const DAY_OF_MINUTES = 1440;
+  const HOUR_OF_MINUTES = 60;
+  const durationMinutes = dayjs(dateB).diff(dateA, 'minute');
+  const day = Math.trunc(durationMinutes / DAY_OF_MINUTES);
+  const hour = Math.trunc(
+    (durationMinutes % DAY_OF_MINUTES) / HOUR_OF_MINUTES
+  );
+  const minute = (durationMinutes % DAY_OF_MINUTES) % HOUR_OF_MINUTES;
+  return {
+    day: createLeadingZero(day),
+    hour: createLeadingZero(hour),
+    minute: createLeadingZero(minute),
+  };
+};
+
+/**
+ *
+ * @param {Object} type тип иконки
+ * @param {Object} iconsMap сопоставление иконок тип = имя
+ * @returns ссылка на изображение
+ */
+export const setIconUrl = (type, iconsMap) => (`img/icons/${iconsMap[type]}`);
+
+/**
+ *
+ * @param {array} cities список городов
+ * @returns разметку выбора списка городов
+ */
+export const generateSelectCities = (cities) => {
+  const citiesLayout = [];
+  for (const city of cities) {
+    citiesLayout.push(`<option value="${city}"></option>`);
+  }
+  return `
+    <datalist id="destination-list-1">
+      ${citiesLayout.join('')}
+    </datalist>
+  `;
+};
