@@ -1,5 +1,6 @@
 import {TypeIcons, ROUTE_CITIES} from './const.js';
 import {humanReadableDate, setIconUrl, generateSelectCities} from './utils.js';
+import {createElement} from '../render.js';
 
 /**
  *
@@ -123,8 +124,9 @@ const setInfo = (description, images) => {
  * @param {Object} routePoint данные о точке маршрута
  * @returns заполненная форма создания или редактирования точки маршрута
  */
-export const createFormPointTemplate = (routePoint) => {
+const createFormPointTemplate = (routePoint) => {
   const {timeStart, timeEnd, type, destination, price, offers, info} = routePoint;
+
   return `<li class="trip-events__item">
     <form class="event event--edit" action="#" method="post">
       <header class="event__header">
@@ -171,3 +173,38 @@ export const createFormPointTemplate = (routePoint) => {
     </form>
   </li>`;
 };
+
+/**
+ *
+ *
+ * @export
+ * @class FormTripPointView
+ */
+export default class FormTripPointView {
+  #element = null;
+  #tripPoint = null;
+  /**
+   * Creates an instance of FormTripPointView.
+   * @param {object} tripPoint данные о точке маршрута
+   * @memberof FormTripPointView
+   */
+  constructor(tripPoint) {
+    this.#tripPoint = tripPoint;
+  }
+
+  get element() {
+    if (!this.#element) {
+      this.#element = createElement(this.template);
+    }
+
+    return this.#element;
+  }
+
+  get template() {
+    return createFormPointTemplate(this.#tripPoint);
+  }
+
+  removeElement() {
+    this.#element = null;
+  }
+}

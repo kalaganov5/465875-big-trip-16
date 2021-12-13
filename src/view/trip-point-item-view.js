@@ -1,10 +1,6 @@
 import {TypeIcons} from './const.js';
 import {humanReadableDate, calculateDate, setIconUrl} from './utils.js';
-
-export const createTripPointListTemplate = () => (
-  `<ul class="trip-events__list">
-  </ul>`
-);
+import {createElement} from '../render.js';
 
 /**
  *
@@ -57,7 +53,12 @@ const setOutputLayoutDateTime = (dateTime) => {
           ${minuteLayot ? minuteLayot : ''}`;
 };
 
-export const createTripPointItemTemplate = (routePoint) => {
+/**
+ *
+ * @param {string} routePoint точка маршрута
+ * @returns разметка точки маршрута
+ */
+const createTripPointItemTemplate = (routePoint) => {
   const {timeStart, timeEnd, type, destination, price, isFavorite, offers} = routePoint;
   return `<li class="trip-events__item">
     <div class="event">
@@ -98,3 +99,31 @@ export const createTripPointItemTemplate = (routePoint) => {
     </div>
   </li>`;
 };
+export default class TripPointView {
+  #element = null;
+  #routePoint = null;
+  /**
+   * Creates an instance of TripPointView.
+   * @param {*} routePoint
+   * @memberof TripPointView
+   */
+  constructor (routePoint) {
+    this.#routePoint = routePoint;
+  }
+
+  get element() {
+    if (!this.#element) {
+      this.#element = createElement(this.template);
+    }
+
+    return this.#element;
+  }
+
+  get template() {
+    return createTripPointItemTemplate(this.#routePoint);
+  }
+
+  removeElement() {
+    this.#element = null;
+  }
+}
