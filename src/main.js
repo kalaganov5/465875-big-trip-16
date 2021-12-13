@@ -26,8 +26,19 @@ const renderContent = (contentContainer, tripPointItems) => {
     for (let i = 0; i < tripPointItems.length; i++) {
       const itemPointComponent = new TripPointView(tripPointItems[i]);
       const itemPointButton = itemPointComponent.element.querySelector('.event__rollup-btn');
+
+      // обработчик на раскрытие формы
       itemPointButton.addEventListener('click', () => {
-        tripPointContainerComponent.element.replaceChild(new FormTripPointView(tripPointItems[i]).element, itemPointComponent.element);
+        const itemPointEdit = new FormTripPointView(tripPointItems[i]);
+        const itemPointForm = itemPointEdit.element.querySelector('.event--edit');
+
+        // обработчик закрытие формы
+        itemPointForm.addEventListener('submit', (evt) => {
+          evt.preventDefault();
+          tripPointContainerComponent.element.replaceChild(itemPointComponent.element, itemPointEdit.element);
+        });
+
+        tripPointContainerComponent.element.replaceChild(itemPointEdit.element, itemPointComponent.element);
       });
       renderElement(tripPointContainerComponent.element, itemPointComponent.element, RenderPosition.BEFOREEND);
     }
