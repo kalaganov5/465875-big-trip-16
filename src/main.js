@@ -3,6 +3,7 @@ import MenuView from './view/menu-view.js';
 import SortView from './view/sort-view.js';
 import TripPointContainer from './view/trip-point-container-view.js';
 import TripPointView from './view/trip-point-item-view';
+import FormTripPointView from './view/form-trip-point-view.js';
 
 import {RenderPosition, renderElement} from './render.js';
 import {getRoutePoint} from './mock/get-route-point.js';
@@ -23,13 +24,15 @@ const renderContent = (contentContainer, tripPointItems) => {
     const tripPointContainerComponent = new TripPointContainer();
     renderElement(contentContainer, tripPointContainerComponent.element, RenderPosition.BEFOREEND);
     for (let i = 0; i < tripPointItems.length; i++) {
-      const itemPointComponent = new TripPointView(tripPointItems[i]).element;
-      renderElement(tripPointContainerComponent.element, itemPointComponent, RenderPosition.BEFOREEND);
+      const itemPointComponent = new TripPointView(tripPointItems[i]);
+      const itemPointButton = itemPointComponent.element.querySelector('.event__rollup-btn');
+      itemPointButton.addEventListener('click', () => {
+        tripPointContainerComponent.element.replaceChild(new FormTripPointView(tripPointItems[i]).element, itemPointComponent.element);
+      });
+      renderElement(tripPointContainerComponent.element, itemPointComponent.element, RenderPosition.BEFOREEND);
     }
   } else {
-    // TEMP
-    // eslint-disable-next-line no-console
-    console.log('empty trip point');
+    // Если ещё нет точке маршрута
   }
 };
 
