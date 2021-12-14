@@ -122,9 +122,10 @@ const setInfo = (description, images) => {
 /**
  *
  * @param {Object} routePoint данные о точке маршрута
+ * @param {Boolean} isCreateEvent true если это создание новой точки маршрута
  * @returns заполненная форма создания или редактирования точки маршрута
  */
-const createFormPointTemplate = (routePoint) => {
+const createFormPointTemplate = (routePoint, isCreateEvent) => {
   const {timeStart, timeEnd, type, destination, price, offers, info} = routePoint;
 
   return `<li class="trip-events__item">
@@ -164,7 +165,8 @@ const createFormPointTemplate = (routePoint) => {
         </div>
 
         <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
-        <button class="event__reset-btn" type="reset">Cancel</button>
+        <button class="event__reset-btn" type="reset">${isCreateEvent ? 'Cancel' : 'Delete'}</button>
+        ${isCreateEvent ? '' : '<button class="event__rollup-btn" type="button"><span class="visually-hidden">Open event</span></button>'}
       </header>
       ${offers.length > 0 || Object.keys(info).length > 0 ?`<section class="event__details">
         ${setOffersCreatePoint(offers)}
@@ -183,13 +185,15 @@ const createFormPointTemplate = (routePoint) => {
 export default class FormTripPointView {
   #element = null;
   #tripPoint = null;
+  #isCreateEvent = false;
   /**
    * Creates an instance of FormTripPointView.
    * @param {object} tripPoint данные о точке маршрута
    * @memberof FormTripPointView
    */
-  constructor(tripPoint) {
+  constructor(tripPoint, isCreateEvent = false) {
     this.#tripPoint = tripPoint;
+    this.#isCreateEvent = isCreateEvent;
   }
 
   get element() {
@@ -201,7 +205,7 @@ export default class FormTripPointView {
   }
 
   get template() {
-    return createFormPointTemplate(this.#tripPoint);
+    return createFormPointTemplate(this.#tripPoint, this.#isCreateEvent);
   }
 
   removeElement() {
