@@ -1,6 +1,6 @@
 import {TypeIcons} from './const.js';
 import {humanReadableDate, calculateDate, setIconUrl} from './utils.js';
-import {createElement} from '../render.js';
+import AbstractView from './abstract-view.js';
 
 /**
  *
@@ -99,8 +99,7 @@ const createTripPointItemTemplate = (routePoint) => {
     </div>
   </li>`;
 };
-export default class TripPointView {
-  #element = null;
+export default class TripPointView extends AbstractView {
   #routePoint = null;
   /**
    * Creates an instance of TripPointView.
@@ -108,22 +107,11 @@ export default class TripPointView {
    * @memberof TripPointView
    */
   constructor (routePoint) {
+    super();
     this.#routePoint = routePoint;
-  }
-
-  get element() {
-    if (!this.#element) {
-      this.#element = createElement(this.template);
-    }
-
-    return this.#element;
   }
 
   get template() {
     return createTripPointItemTemplate(this.#routePoint);
-  }
-
-  removeElement() {
-    this.#element = null;
   }
 }

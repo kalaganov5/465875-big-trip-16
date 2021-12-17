@@ -1,6 +1,6 @@
 import {TypeIcons, ROUTE_CITIES} from './const.js';
 import {humanReadableDate, setIconUrl, generateSelectCities} from './utils.js';
-import {createElement} from '../render.js';
+import AbstractView from './abstract-view.js';
 
 /**
  *
@@ -182,8 +182,7 @@ const createFormPointTemplate = (routePoint, isCreateEvent) => {
  * @export
  * @class FormTripPointView
  */
-export default class FormTripPointView {
-  #element = null;
+export default class FormTripPointView extends AbstractView {
   #tripPoint = null;
   #isCreateEvent = false;
   /**
@@ -192,23 +191,12 @@ export default class FormTripPointView {
    * @memberof FormTripPointView
    */
   constructor(tripPoint, isCreateEvent = false) {
+    super();
     this.#tripPoint = tripPoint;
     this.#isCreateEvent = isCreateEvent;
   }
 
-  get element() {
-    if (!this.#element) {
-      this.#element = createElement(this.template);
-    }
-
-    return this.#element;
-  }
-
   get template() {
     return createFormPointTemplate(this.#tripPoint, this.#isCreateEvent);
-  }
-
-  removeElement() {
-    this.#element = null;
   }
 }

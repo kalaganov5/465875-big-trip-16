@@ -1,27 +1,15 @@
-import {createElement} from '../render.js';
 import {FilterNames} from './const.js';
+import AbstractView from './abstract-view.js';
 
-export default class TripPointEmptyView {
-  #element = null;
+export default class TripPointEmptyView extends AbstractView {
   #currentFilterName = null;
 
   constructor(filterName = 'everything') {
+    super();
     this.#currentFilterName = filterName;
-  }
-
-  get element() {
-    if (!this.#element) {
-      this.#element = createElement(this.template);
-    }
-
-    return this.#element;
   }
 
   get template() {
     return `<p class="trip-events__msg">${FilterNames[this.#currentFilterName]}</p>`;
-  }
-
-  removeElement() {
-    this.#element = null;
   }
 }
