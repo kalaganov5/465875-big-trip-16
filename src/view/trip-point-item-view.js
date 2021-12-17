@@ -114,4 +114,14 @@ export default class TripPointView extends AbstractView {
   get template() {
     return createTripPointItemTemplate(this.#routePoint);
   }
+
+  setEditTripPointHandler = (callbackFunction) => {
+    this._callback.editTripPoint = callbackFunction;
+    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#editTripPointHandler);
+  }
+
+  #editTripPointHandler = (evt) => {
+    evt.preventDefault();
+    this._callback.editTripPoint();
+  }
 }

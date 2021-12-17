@@ -188,15 +188,36 @@ export default class FormTripPointView extends AbstractView {
   /**
    * Creates an instance of FormTripPointView.
    * @param {object} tripPoint данные о точке маршрута
+   * @param {object} isCreateRoutePointEvent true если это создание новой точки маршрута или false если это редактирование точки маршрута
    * @memberof FormTripPointView
    */
-  constructor(tripPoint, isCreateEvent = false) {
+  constructor(tripPoint, isCreateRoutePointEvent = false) {
     super();
     this.#tripPoint = tripPoint;
-    this.#isCreateEvent = isCreateEvent;
+    this.#isCreateEvent = isCreateRoutePointEvent;
   }
 
   get template() {
     return createFormPointTemplate(this.#tripPoint, this.#isCreateEvent);
+  }
+
+  setFormCloseHandler = (callbackFunction) => {
+    this._callback.formCloseHandler = callbackFunction;
+    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#formCloseHandler);
+  }
+
+  #formCloseHandler = (evt) => {
+    evt.preventDefault();
+    this._callback.formCloseHandler();
+  }
+
+  setFormSubmitHandler = (callbackFunction) => {
+    this._callback.formSubmitHandler = callbackFunction;
+    this.element.querySelector('.event--edit').addEventListener('submit', this.#formSubmitHandler);
+  }
+
+  #formSubmitHandler = (evt) => {
+    evt.preventDefault();
+    this._callback.formSubmitHandler();
   }
 }

@@ -6,7 +6,7 @@ import TripPointView from './view/trip-point-item-view';
 import FormTripPointView from './view/form-trip-point-view.js';
 import TripPointEmptyView from './view/trip-point-empty-view.js';
 
-import {RenderPosition, renderElement} from './utils/render.js';
+import {RenderPosition, renderElement, replace} from './utils/render.js';
 import {getRoutePoint} from './mock/get-route-point.js';
 
 const TRIP_POINT_COUNT = 20;
@@ -28,10 +28,13 @@ renderElement(menuContainer, new MenuView(), RenderPosition.BEFOREEND);
 const renderTripPoint = (container, tripPointItem) => {
   const tripPointComponent = new TripPointView(tripPointItem);
   const tripPointFormComponent = new FormTripPointView(tripPointItem);
-  const tripPointButton = tripPointComponent.element.querySelector('.event__rollup-btn');
 
   const replaceFormToTripPoint = () => {
-    container.replaceChild(tripPointComponent.element, tripPointFormComponent.element);
+    replace(tripPointComponent, tripPointFormComponent);
+  };
+
+  const replaceTripPointToForm = () => {
+    replace(tripPointFormComponent, tripPointComponent);
   };
 
   const onEscKeyDown = (evt) => {
@@ -42,31 +45,24 @@ const renderTripPoint = (container, tripPointItem) => {
     }
   };
 
-  const tripPointSubmitForm = (evt) => {
-    evt.preventDefault();
-    replaceFormToTripPoint();
-    document.removeEventListener('keydown', onEscKeyDown);
-  };
-
-  const tripPointCloseForm = (evt) => {
-    evt.preventDefault();
-    replaceFormToTripPoint();
-    document.removeEventListener('keydown', onEscKeyDown);
-  };
-
   // обработчик на раскрытие
-  tripPointButton.addEventListener('click', () => {
-    const itemPointCloseButton = tripPointFormComponent.element.querySelector('.event__rollup-btn');
-    const tripPointForm = tripPointFormComponent.element.querySelector('.event--edit');
+  tripPointComponent.setEditTripPointHandler(() => {
 
-    container.replaceChild(tripPointFormComponent.element, tripPointComponent.element);
+    replaceTripPointToForm();
+
     document.addEventListener('keydown', onEscKeyDown);
 
-    // обработчик отправки и закрытие формы
-    tripPointForm.addEventListener('submit', tripPointSubmitForm);
+    // Форма обработчик отправки и закрытие
+    tripPointFormComponent.setFormSubmitHandler(() => {
+      replaceFormToTripPoint();
+      document.removeEventListener('keydown', onEscKeyDown);
+    });
 
-    // обработчик кнопки закрыть
-    itemPointCloseButton.addEventListener('click', tripPointCloseForm);
+    // Форма обработчик кнопки закрыть
+    tripPointFormComponent.setFormCloseHandler(() => {
+      replaceFormToTripPoint();
+      document.removeEventListener('keydown', onEscKeyDown);
+    });
   });
 
   renderElement(container, tripPointComponent, RenderPosition.BEFOREEND);
