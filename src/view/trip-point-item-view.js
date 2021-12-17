@@ -45,12 +45,12 @@ const setIsFavorite = (isFavorite) => (isFavorite ? 'event__favorite-btn--active
  */
 const setOutputLayoutDateTime = (dateTime) => {
   const {day, hour, minute} = dateTime;
-  const dayLayot = `${+day > 0 ? `${day}d ` : ''}`;
-  const hourLayot = `${+hour > 0 || +day > 0 ? `${hour}h `: ''}`;
-  const minuteLayot = `${+minute > 0 || +hour > 0 || +day > 0 ? `${minute}m` : ''}`;
-  return `${dayLayot ? dayLayot : ''}
-          ${hourLayot ? hourLayot : ''}
-          ${minuteLayot ? minuteLayot : ''}`;
+  const dayLayout = `${+day > 0 ? `${day}d ` : ''}`;
+  const hourLayout = `${+hour > 0 || +day > 0 ? `${hour}h `: ''}`;
+  const minuteLayout = `${+minute > 0 || +hour > 0 || +day > 0 ? `${minute}m` : ''}`;
+  return `${dayLayout ? dayLayout : ''}
+          ${hourLayout ? hourLayout : ''}
+          ${minuteLayout ? minuteLayout : ''}`;
 };
 
 /**
