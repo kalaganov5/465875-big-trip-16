@@ -6,7 +6,7 @@ import TripPointView from './view/trip-point-item-view';
 import FormTripPointView from './view/form-trip-point-view.js';
 import TripPointEmptyView from './view/trip-point-empty-view.js';
 
-import {RenderPosition, renderElement} from './render.js';
+import {RenderPosition, renderElement} from './utils/render.js';
 import {getRoutePoint} from './mock/get-route-point.js';
 
 const TRIP_POINT_COUNT = 20;
@@ -16,8 +16,8 @@ const menuContainer = document.querySelector('.trip-controls__navigation');
 const filterContainer = document.querySelector('.trip-controls__filters');
 const sortAndContentContainer = document.querySelector('.trip-events');
 
-renderElement(filterContainer, new FilterView().element, RenderPosition.BEFOREEND);
-renderElement(menuContainer, new MenuView().element, RenderPosition.BEFOREEND);
+renderElement(filterContainer, new FilterView(), RenderPosition.BEFOREEND);
+renderElement(menuContainer, new MenuView(), RenderPosition.BEFOREEND);
 
 /**
  *
@@ -69,7 +69,7 @@ const renderTripPoint = (container, tripPointItem) => {
     itemPointCloseButton.addEventListener('click', tripPointCloseForm);
   });
 
-  renderElement(container, tripPointComponent.element, RenderPosition.BEFOREEND);
+  renderElement(container, tripPointComponent, RenderPosition.BEFOREEND);
 };
 
 /**
@@ -83,13 +83,13 @@ const renderContent = (contentContainer, tripPointItems) => {
   // показывая исходя из выбранного фильтра меню
   // Everything, Future, Past
   if (tripPointItems.length === 0) {
-    renderElement(contentContainer, new TripPointEmptyView('everything').element, RenderPosition.BEFOREEND);
+    renderElement(contentContainer, new TripPointEmptyView('everything'), RenderPosition.BEFOREEND);
     return;
   }
 
-  renderElement(contentContainer, new SortView().element, RenderPosition.BEFOREEND);
+  renderElement(contentContainer, new SortView(), RenderPosition.BEFOREEND);
   const tripPointContainerComponent = new TripPointContainer();
-  renderElement(contentContainer, tripPointContainerComponent.element, RenderPosition.BEFOREEND);
+  renderElement(contentContainer, tripPointContainerComponent, RenderPosition.BEFOREEND);
 
   tripPointItems.forEach((tripPointItem) => {
     renderTripPoint(tripPointContainerComponent.element, tripPointItem);
