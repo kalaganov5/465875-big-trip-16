@@ -1,6 +1,6 @@
 import {TypeIcons} from './const.js';
 import {humanReadableDate, calculateDate, setIconUrl} from './utils.js';
-import {createElement} from '../render.js';
+import AbstractView from './abstract-view.js';
 
 /**
  *
@@ -45,12 +45,12 @@ const setIsFavorite = (isFavorite) => (isFavorite ? 'event__favorite-btn--active
  */
 const setOutputLayoutDateTime = (dateTime) => {
   const {day, hour, minute} = dateTime;
-  const dayLayot = `${+day > 0 ? `${day}d ` : ''}`;
-  const hourLayot = `${+hour > 0 || +day > 0 ? `${hour}h `: ''}`;
-  const minuteLayot = `${+minute > 0 || +hour > 0 || +day > 0 ? `${minute}m` : ''}`;
-  return `${dayLayot ? dayLayot : ''}
-          ${hourLayot ? hourLayot : ''}
-          ${minuteLayot ? minuteLayot : ''}`;
+  const dayLayout = `${+day > 0 ? `${day}d ` : ''}`;
+  const hourLayout = `${+hour > 0 || +day > 0 ? `${hour}h `: ''}`;
+  const minuteLayout = `${+minute > 0 || +hour > 0 || +day > 0 ? `${minute}m` : ''}`;
+  return `${dayLayout ? dayLayout : ''}
+          ${hourLayout ? hourLayout : ''}
+          ${minuteLayout ? minuteLayout : ''}`;
 };
 
 /**
@@ -99,8 +99,7 @@ const createTripPointItemTemplate = (routePoint) => {
     </div>
   </li>`;
 };
-export default class TripPointView {
-  #element = null;
+export default class TripPointView extends AbstractView {
   #routePoint = null;
   /**
    * Creates an instance of TripPointView.
@@ -108,22 +107,21 @@ export default class TripPointView {
    * @memberof TripPointView
    */
   constructor (routePoint) {
+    super();
     this.#routePoint = routePoint;
-  }
-
-  get element() {
-    if (!this.#element) {
-      this.#element = createElement(this.template);
-    }
-
-    return this.#element;
   }
 
   get template() {
     return createTripPointItemTemplate(this.#routePoint);
   }
 
-  removeElement() {
-    this.#element = null;
+  setEditTripPointHandler = (callbackFunction) => {
+    this._callback.editTripPoint = callbackFunction;
+    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#editTripPointHandler);
+  }
+
+  #editTripPointHandler = (evt) => {
+    evt.preventDefault();
+    this._callback.editTripPoint();
   }
 }

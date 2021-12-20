@@ -1,6 +1,6 @@
 import {TypeIcons, ROUTE_CITIES} from './const.js';
 import {humanReadableDate, setIconUrl, generateSelectCities} from './utils.js';
-import {createElement} from '../render.js';
+import AbstractView from './abstract-view.js';
 
 /**
  *
@@ -182,33 +182,42 @@ const createFormPointTemplate = (routePoint, isCreateEvent) => {
  * @export
  * @class FormTripPointView
  */
-export default class FormTripPointView {
-  #element = null;
+export default class FormTripPointView extends AbstractView {
   #tripPoint = null;
   #isCreateEvent = false;
   /**
    * Creates an instance of FormTripPointView.
    * @param {object} tripPoint данные о точке маршрута
+   * @param {object} isCreateRoutePointEvent true если это создание новой точки маршрута или false если это редактирование точки маршрута
    * @memberof FormTripPointView
    */
-  constructor(tripPoint, isCreateEvent = false) {
+  constructor(tripPoint, isCreateRoutePointEvent = false) {
+    super();
     this.#tripPoint = tripPoint;
-    this.#isCreateEvent = isCreateEvent;
-  }
-
-  get element() {
-    if (!this.#element) {
-      this.#element = createElement(this.template);
-    }
-
-    return this.#element;
+    this.#isCreateEvent = isCreateRoutePointEvent;
   }
 
   get template() {
     return createFormPointTemplate(this.#tripPoint, this.#isCreateEvent);
   }
 
-  removeElement() {
-    this.#element = null;
+  setFormCloseHandler = (callbackFunction) => {
+    this._callback.formCloseHandler = callbackFunction;
+    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#formCloseHandler);
+  }
+
+  #formCloseHandler = (evt) => {
+    evt.preventDefault();
+    this._callback.formCloseHandler();
+  }
+
+  setFormSubmitHandler = (callbackFunction) => {
+    this._callback.formSubmitHandler = callbackFunction;
+    this.element.querySelector('.event--edit').addEventListener('submit', this.#formSubmitHandler);
+  }
+
+  #formSubmitHandler = (evt) => {
+    evt.preventDefault();
+    this._callback.formSubmitHandler();
   }
 }

@@ -1,3 +1,5 @@
+import AbstractView from '../view/abstract-view.js';
+
 export const RenderPosition = {
   BEFOREBEGIN: 'beforebegin',
   AFTERBEGIN: 'afterbegin',
@@ -28,18 +30,42 @@ export const createElement = (template) => {
  * @param {string} place положение в начало или в конец
  */
 export const renderElement = (container, element, place) => {
+  const parentContainer = container instanceof AbstractView ? container.element : container;
+  const childElement = element instanceof AbstractView ? element.element : element;
   switch (place) {
     case RenderPosition.BEFOREBEGIN:
-      container.before(element);
+      parentContainer.before(childElement);
       break;
     case RenderPosition.AFTERBEGIN:
-      container.prepend(element);
+      parentContainer.prepend(childElement);
       break;
     case RenderPosition.BEFOREEND:
-      container.append(element);
+      parentContainer.append(childElement);
       break;
     case RenderPosition.AFTEREND:
-      container.after(element);
+      parentContainer.after(childElement);
       break;
   }
 };
+
+/**
+ *
+ * @param {*} newElement элемент на который будет заменён
+ * @param {*} oldElement элемент который будет заменён
+ */
+export const replace = (newElement, oldElement) => {
+  if (newElement === null || oldElement === null) {
+    throw new Error('Can\'t replace unexisting elements');
+  }
+
+  const newChild = newElement instanceof AbstractView ? newElement.element : newElement;
+  const oldChild = oldElement instanceof AbstractView ? oldElement.element : oldElement;
+  const parent = oldChild.parentElement;
+
+  if (parent === null) {
+    throw new Error('Parent element doesn\'t exist');
+  }
+
+  parent.replaceChild(newChild, oldChild);
+};
+
