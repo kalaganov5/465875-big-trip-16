@@ -3,21 +3,31 @@ import FormTripPointView from '../view/form-trip-point-view.js';
 import {renderElement, replace, RenderPosition} from '../utils/render.js';
 import {remove} from '../utils/common.js';
 
+const Mode = {
+  DEFAULT: 'DEFAULT',
+  EDITING: 'EDITING',
+};
+
+
 export default class TripPointPresenter {
   #tripPointData = null;
   #changeData = null;
+  #changeMode = null;
+
   #tripPointContainer = null;
   #tripPointComponent = null;
   #tripPointFormComponent = null;
+  #mode = Mode.DEFAULT
 
   /**
    * Creates an instance of TripPointPresenter.
    * @param {object} tripPoint данные о точки маршрута
    * @memberof TripPointPresenter
    */
-  constructor (tripPointContainer, changeData) {
+  constructor (tripPointContainer, changeData, changeMode) {
     this.#tripPointContainer = tripPointContainer;
     this.#changeData = changeData;
+    this.#changeMode = changeMode;
   }
 
   init = (tripPointItem) => {
@@ -40,18 +50,22 @@ export default class TripPointPresenter {
       return;
     }
 
-    // Проверка на наличие в DOM необходима,
-    // чтобы не пытаться заменить то, что не было отрисовано
-    if (this.#tripPointContainer.element.contains(prevTripPointComponent.element)) {
+    if (this.#mode === Mode.DEFAULT) {
       replace(this.#tripPointComponent, prevTripPointComponent);
     }
 
-    if (this.#tripPointContainer.element.contains(prevTripPointFormComponent.element)) {
+    if (this.#mode === Mode.EDITING) {
       replace(this.#tripPointFormComponent, prevTripPointFormComponent);
     }
 
     remove(prevTripPointFormComponent);
     remove(prevTripPointComponent);
+  }
+
+  resetView = () => {
+    if (this.#mode !== Mode.DEFAULT) {
+      this.#replaceFormToTripPoint();
+    }
   }
 
   destroy = () => {
@@ -61,11 +75,14 @@ export default class TripPointPresenter {
 
   #replaceFormToTripPoint = () => {
     replace(this.#tripPointComponent, this.#tripPointFormComponent);
+    this.#mode = Mode.DEFAULT;
   }
 
   #replaceTripPointToForm = () => {
     replace(this.#tripPointFormComponent, this.#tripPointComponent);
     document.addEventListener('keydown', this.#onEscKeyDown);
+    this.#changeMode();
+    this.#mode = Mode.EDITING;
   }
 
   #onEscKeyDown = (evt) => {

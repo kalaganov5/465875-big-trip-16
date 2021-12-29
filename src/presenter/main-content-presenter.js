@@ -50,6 +50,10 @@ export default class MainContentPresenter {
     this.#tripPointPresenter.get(updatedTripPoint.id).init(updatedTripPoint);
   }
 
+  #handleModeChange = () => {
+    this.#tripPointPresenter.forEach((presenter) => presenter.resetView());
+  }
+
   #renderMenu = () => {
     renderElement(this.#menuContainer, this.#menuComponent, RenderPosition.BEFOREEND);
   }
@@ -73,11 +77,12 @@ export default class MainContentPresenter {
 
   #renderTripPoint = (tripPointItem) => {
     // рендер одной точки маршрута
-    const tripPointPresenter = new TripPointPresenter(this.#tripPointContainerComponent, this.#handleTripPoints);
+    const tripPointPresenter = new TripPointPresenter(this.#tripPointContainerComponent, this.#handleTripPoints, this.#handleModeChange);
     tripPointPresenter.init(tripPointItem);
     this.#tripPointPresenter.set(tripPointItem.id, tripPointPresenter);
   }
 
+  // заготовка для сортировка
   #clearTripPointList = () => {
     this.#tripPointPresenter.forEach((presenter) => (presenter.destroy));
     this.#tripPointPresenter.clear();
