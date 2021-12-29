@@ -1,4 +1,4 @@
-import TripPointsPresenter from './presenter/trip-points-presenter.js';
+import MainContentPresenter from './presenter/main-content-presenter.js';
 import {getRoutePoint} from './mock/get-route-point.js';
 
 const TRIP_POINT_COUNT = 20;
@@ -10,5 +10,5 @@ const filterContainer = document.querySelector('.trip-controls__filters');
 const sortAndContentContainer = document.querySelector('.trip-events');
 // :END Контейнеры
 
-const presenter = new TripPointsPresenter(menuContainer, filterContainer, sortAndContentContainer);
+const presenter = new MainContentPresenter(menuContainer, filterContainer, sortAndContentContainer);
 presenter.init(tripPoints);

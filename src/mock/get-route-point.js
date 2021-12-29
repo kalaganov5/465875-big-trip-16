@@ -2,6 +2,7 @@ import {ROUTE_TYPE, ROUTE_CITIES, ROUTE_DESCRIPTION} from './const.js';
 import {getRandomInteger, getRandomItemArray} from './utils.js';
 import {setOffers} from './get-point-offers.js';
 import dayjs from 'dayjs';
+import {nanoid} from 'nanoid';
 
 const PHOTOS_NUMBER = 10;
 const HOUR_IN_DAY = 24;
@@ -59,6 +60,7 @@ const getRandomDateTime = (start = 0, end = 7) => (
  */
 export const getRoutePoint = (type = getRandomItemArray(ROUTE_TYPE)) => (
   {
+    id: nanoid(),
     destination: getRandomItemArray(ROUTE_CITIES),
     type: type,
     info: {

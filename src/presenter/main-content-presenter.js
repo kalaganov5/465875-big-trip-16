@@ -5,10 +5,11 @@ import TripPointContainerView from '../view/trip-point-container-view.js';
 import TripPointEmptyView from '../view/trip-point-empty-view.js';
 import TripPointPresenter from './trip-point-presenter.js';
 
+import {updateItem} from '../utils/common.js';
 import {RenderPosition, renderElement} from '../utils/render.js';
 import {FiltersName} from './const.js';
 
-export default class TripPointsPresenter {
+export default class MainContentPresenter {
   #menuContainer = null;
   #filterContainer = null;
   #contentContainer = null;
@@ -22,6 +23,7 @@ export default class TripPointsPresenter {
   #tripPointComponent = null;
 
   #tripPoints = [];
+  #tripPointPresenter = new Map();
   #sourceTripPoints = [];
 
   constructor (menuContainer, filterContainer, contentContainer) {
@@ -41,6 +43,11 @@ export default class TripPointsPresenter {
     this.#renderTripPointContainer();
 
     this.#renderTripPoints();
+  }
+
+  #handleTripPoints = (updatedTripPoint) => {
+    this.#tripPoints = updateItem(this.#tripPoints, updatedTripPoint);
+    this.#tripPointPresenter.get(updatedTripPoint.id).init(updatedTripPoint);
   }
 
   #renderMenu = () => {
@@ -66,8 +73,14 @@ export default class TripPointsPresenter {
 
   #renderTripPoint = (tripPointItem) => {
     // рендер одной точки маршрута
-    this.#tripPointComponent = new TripPointPresenter(this.#tripPointContainerComponent);
-    this.#tripPointComponent.init(tripPointItem);
+    const tripPointPresenter = new TripPointPresenter(this.#tripPointContainerComponent, this.#handleTripPoints);
+    tripPointPresenter.init(tripPointItem);
+    this.#tripPointPresenter.set(tripPointItem.id, tripPointPresenter);
+  }
+
+  #clearTripPointList = () => {
+    this.#tripPointPresenter.forEach((presenter) => (presenter.destroy));
+    this.#tripPointPresenter.clear();
   }
 
   #renderTripPoints = () => {

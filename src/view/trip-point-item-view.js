@@ -2,6 +2,8 @@ import {TypeIcons} from './const.js';
 import {humanReadableDate, calculateDate, setIconUrl} from './utils.js';
 import AbstractView from './abstract-view.js';
 
+const favoriteButtonActiveClass = 'event__favorite-btn--active';
+
 /**
  *
  * @param {Array} offers массив объектов с опциями для точки маршрута
@@ -33,7 +35,7 @@ const setOffers = (offers) => {
  * @param {boolean} isFavorite значение true или false
  * @returns класс или ничего
  */
-const setIsFavorite = (isFavorite) => (isFavorite ? 'event__favorite-btn--active' : '');
+const setIsFavorite = (isFavorite) => (isFavorite ? favoriteButtonActiveClass : '');
 
 /**
  *
@@ -101,6 +103,8 @@ const createTripPointItemTemplate = (routePoint) => {
 };
 export default class TripPointView extends AbstractView {
   #routePoint = null;
+  #favoriteButton = null;
+
   /**
    * Creates an instance of TripPointView.
    * @param {*} routePoint
@@ -123,5 +127,20 @@ export default class TripPointView extends AbstractView {
   #editTripPointHandler = (evt) => {
     evt.preventDefault();
     this._callback.editTripPoint();
+  }
+
+  setToggleFavoritePointHandler = (callbackFunction) => {
+    // console.log(callbackFunction)
+    // console.log(this.#favoriteButton)
+    this._callback.toggleFavoritePoint = callbackFunction;
+    this.#favoriteButton = this.element.querySelector('.event__favorite-btn');
+    // console.log(this.#favoriteButton)
+    this.#favoriteButton.addEventListener('click', this.#toggleFavoritePointHandler);
+  }
+
+  #toggleFavoritePointHandler = (evt) => {
+    evt.preventDefault();
+    this._callback.toggleFavoritePoint();
+    // this.#favoriteButton.classList.toggle(favoriteButtonActiveClass);
   }
 }

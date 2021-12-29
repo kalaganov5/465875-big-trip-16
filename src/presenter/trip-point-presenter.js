@@ -1,8 +1,11 @@
 import TripPointView from '../view/trip-point-item-view';
 import FormTripPointView from '../view/form-trip-point-view.js';
 import {renderElement, replace, RenderPosition} from '../utils/render.js';
+import {remove} from '../utils/common.js';
 
 export default class TripPointPresenter {
+  #tripPointData = null;
+  #changeData = null;
   #tripPointContainer = null;
   #tripPointComponent = null;
   #tripPointFormComponent = null;
@@ -12,20 +15,48 @@ export default class TripPointPresenter {
    * @param {object} tripPoint данные о точки маршрута
    * @memberof TripPointPresenter
    */
-  constructor (tripPointContainer) {
+  constructor (tripPointContainer, changeData) {
     this.#tripPointContainer = tripPointContainer;
+    this.#changeData = changeData;
   }
 
   init = (tripPointItem) => {
-    this.#tripPointComponent = new TripPointView(tripPointItem);
-    this.#tripPointFormComponent = new FormTripPointView(tripPointItem);
+    this.#tripPointData = tripPointItem;
+
+    const prevTripPointComponent = this.#tripPointComponent;
+    const prevTripPointFormComponent = this.#tripPointFormComponent;
+
+    this.#tripPointComponent = new TripPointView(this.#tripPointData);
+    this.#tripPointFormComponent = new FormTripPointView(this.#tripPointData);
 
     this.#tripPointComponent.setEditTripPointHandler(this.#replaceTripPointToForm);
+    this.#tripPointComponent.setToggleFavoritePointHandler(this.#toggleFavoritePoint);
 
     this.#tripPointFormComponent.setFormCloseHandler(this.#replaceFormToTripPoint);
     this.#tripPointFormComponent.setFormSubmitHandler(this.#replaceFormToTripPoint);
 
-    renderElement(this.#tripPointContainer, this.#tripPointComponent, RenderPosition.BEFOREEND);
+    if (prevTripPointComponent === null || prevTripPointFormComponent === null) {
+      renderElement(this.#tripPointContainer, this.#tripPointComponent, RenderPosition.BEFOREEND);
+      return;
+    }
+
+    // Проверка на наличие в DOM необходима,
+    // чтобы не пытаться заменить то, что не было отрисовано
+    if (this.#tripPointContainer.element.contains(prevTripPointComponent.element)) {
+      replace(this.#tripPointComponent, prevTripPointComponent);
+    }
+
+    if (this.#tripPointContainer.element.contains(prevTripPointFormComponent.element)) {
+      replace(this.#tripPointFormComponent, prevTripPointFormComponent);
+    }
+
+    remove(prevTripPointFormComponent);
+    remove(prevTripPointComponent);
+  }
+
+  destroy = () => {
+    remove(this.#tripPointComponent);
+    remove(this.#tripPointFormComponent);
   }
 
   #replaceFormToTripPoint = () => {
@@ -43,5 +74,9 @@ export default class TripPointPresenter {
       this.#replaceFormToTripPoint();
       document.removeEventListener('keydown', this.#onEscKeyDown);
     }
+  }
+
+  #toggleFavoritePoint = () => {
+    this.#changeData({...this.#tripPointData, isFavorite: !this.#tripPointData.isFavorite});
   }
 }
