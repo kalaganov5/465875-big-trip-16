@@ -130,17 +130,13 @@ export default class TripPointView extends AbstractView {
   }
 
   setToggleFavoritePointHandler = (callbackFunction) => {
-    // console.log(callbackFunction)
-    // console.log(this.#favoriteButton)
     this._callback.toggleFavoritePoint = callbackFunction;
     this.#favoriteButton = this.element.querySelector('.event__favorite-btn');
-    // console.log(this.#favoriteButton)
     this.#favoriteButton.addEventListener('click', this.#toggleFavoritePointHandler);
   }
 
   #toggleFavoritePointHandler = (evt) => {
     evt.preventDefault();
     this._callback.toggleFavoritePoint();
-    // this.#favoriteButton.classList.toggle(favoriteButtonActiveClass);
   }
 }

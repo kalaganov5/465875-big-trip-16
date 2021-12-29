@@ -3,3 +3,8 @@ export const FiltersName = {
   FUTURE: 'future',
   PAST: 'past',
 };
+
+export const Mode = {
+  DEFAULT: 'DEFAULT',
+  EDITING: 'EDITING',
+};
