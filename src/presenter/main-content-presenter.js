@@ -73,6 +73,16 @@ export default class MainContentPresenter {
 
   #renderSort = () => {
     renderElement(this.#contentContainer, this.#sortComponent, RenderPosition.BEFOREEND);
+    this.#sortComponent.setSortHandler(this.#sortClickHandler);
+  }
+
+  #sortClickHandler = () => {
+    // Принимаем информацию какой тип сортировки нужно сделать
+    // фильтруем точки маршрута
+    // очистка текущего списка маршрута
+    // рисуем заново
+    // this.#clearTripPointList();
+    // this.#renderTripPoints();
   }
 
   #renderTripPoint = (tripPointItem) => {

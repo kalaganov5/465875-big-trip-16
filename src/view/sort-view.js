@@ -30,7 +30,20 @@ const createSortTemplate = () => (
 );
 
 export default class SortView extends AbstractView {
+
   get template() {
     return createSortTemplate();
+  }
+
+  setSortHandler = (callbackFunction) => {
+    this._callback.sortHandler = callbackFunction;
+    this.element.addEventListener('change', this.#sortHandler);
+  }
+
+  #sortHandler = (evt) => {
+    evt.preventDefault();
+    if (evt.target.classList.contains('trip-sort__input')) {
+      this._callback.sortHandler();
+    }
   }
 }
