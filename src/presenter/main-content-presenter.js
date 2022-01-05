@@ -5,9 +5,10 @@ import TripPointContainerView from '../view/trip-point-container-view.js';
 import TripPointEmptyView from '../view/trip-point-empty-view.js';
 import TripPointPresenter from './trip-point-presenter.js';
 
-import {updateItem} from '../utils/common.js';
+import {updateItem, sortByDurationUp, sortByPriceUp} from '../utils/common.js';
 import {RenderPosition, renderElement} from '../utils/render.js';
 import {FiltersName} from './const.js';
+import {SortType} from '../const.js';
 
 export default class MainContentPresenter {
   #menuContainer = null;
@@ -33,9 +34,9 @@ export default class MainContentPresenter {
   }
 
   init = (tripPoints) => {
-    this.#tripPoints = tripPoints;
+    this.#tripPoints = [...tripPoints];
     // Заготовка для сортировки
-    this.#sourceTripPoints = tripPoints;
+    this.#sourceTripPoints = [...tripPoints];
 
     this.#renderMenu();
     this.#renderFilter();
@@ -73,16 +74,27 @@ export default class MainContentPresenter {
 
   #renderSort = () => {
     renderElement(this.#contentContainer, this.#sortComponent, RenderPosition.BEFOREEND);
-    this.#sortComponent.setSortHandler(this.#sortClickHandler);
+    this.#sortComponent.setSortChangeHandler(this.#sortHandler);
   }
 
-  #sortClickHandler = () => {
-    // Принимаем информацию какой тип сортировки нужно сделать
-    // фильтруем точки маршрута
-    // очистка текущего списка маршрута
-    // рисуем заново
-    // this.#clearTripPointList();
-    // this.#renderTripPoints();
+  #sortHandler = (sortType) => {
+    this.#clearTripPointList();
+
+    switch (sortType) {
+      case SortType.DEFAULT:
+        this.#tripPoints = [...this.#sourceTripPoints];
+        break;
+
+      case SortType.TIME:
+        this.#tripPoints.sort(sortByDurationUp);
+        break;
+
+      case SortType.PRICE:
+        this.#tripPoints.sort(sortByPriceUp);
+        break;
+    }
+
+    this.#renderTripPoints();
   }
 
   #renderTripPoint = (tripPointItem) => {
@@ -94,7 +106,7 @@ export default class MainContentPresenter {
 
   // заготовка для сортировка
   #clearTripPointList = () => {
-    this.#tripPointPresenter.forEach((presenter) => (presenter.destroy));
+    this.#tripPointPresenter.forEach((presenter) => (presenter.destroy()));
     this.#tripPointPresenter.clear();
   }
 

@@ -1,4 +1,5 @@
 import AbstractView from '../view/abstract-view.js';
+import dayjs from 'dayjs';
 
 /**
  *
@@ -37,3 +38,13 @@ export const updateItem = (items, update) => {
     ...items.slice(index + 1),
   ];
 };
+
+
+export const sortByDurationUp = (tripPointA, tripPointB) => {
+  // остается погрешность при сортировке в секундах
+  const tripPointDurationA = dayjs(tripPointA.timeEnd).diff(tripPointA.timeStart, 'minutes');
+  const tripPointDurationB = dayjs(tripPointB.timeEnd).diff(tripPointB.timeStart, 'minutes');
+  return tripPointDurationB - tripPointDurationA;
+};
+
+export const sortByPriceUp = (tripPointA, tripPointB) => (tripPointB.price - tripPointA.price);
