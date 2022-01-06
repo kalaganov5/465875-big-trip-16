@@ -58,3 +58,15 @@ export const sortDurationDescending = (tripPointA, tripPointB) => {
  * @returns сортировка по цене от большего к меньшему
  */
 export const sortPriceDescending = (tripPointA, tripPointB) => (tripPointB.price - tripPointA.price);
+
+/**
+ *
+ * @param {*} tripPointA объект точки маршрута
+ * @param {*} tripPointB объект точки маршрута
+ * @returns сортировка дни по возрастанию
+ */
+export const sortDayAscending = (tripPointA, tripPointB) => {
+  const tripPointDayA = tripPointA.timeStart;
+  const tripPointDayB = tripPointB.timeStart;
+  return dayjs(tripPointDayA).diff(tripPointDayB);
+};

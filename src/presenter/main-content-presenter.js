@@ -5,7 +5,7 @@ import TripPointContainerView from '../view/trip-point-container-view.js';
 import TripPointEmptyView from '../view/trip-point-empty-view.js';
 import TripPointPresenter from './trip-point-presenter.js';
 
-import {updateItem, sortDurationDescending, sortPriceDescending} from '../utils/common.js';
+import {updateItem, sortDurationDescending, sortPriceDescending, sortDayAscending} from '../utils/common.js';
 import {RenderPosition, renderElement} from '../utils/render.js';
 import {FiltersName} from './const.js';
 import {SortType} from '../const.js';
@@ -34,7 +34,9 @@ export default class MainContentPresenter {
 
   init = (tripPoints) => {
     this.#tripPoints = [...tripPoints];
-    this.#sourceTripPoints = [...tripPoints];
+    // сортируем дни по возрастанию
+    this.#tripPoints = this.#tripPoints.sort(sortDayAscending);
+    this.#sourceTripPoints = [...this.#tripPoints];
 
     this.#renderMenu();
     this.#renderFilter();
