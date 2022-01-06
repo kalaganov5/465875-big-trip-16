@@ -1,5 +1,6 @@
 import TripPointView from '../view/trip-point-item-view';
 import FormTripPointView from '../view/form-trip-point-view.js';
+
 import {renderElement, replace, RenderPosition} from '../utils/render.js';
 import {remove} from '../utils/common.js';
 import {Mode} from './const.js';
@@ -12,6 +13,7 @@ export default class TripPointPresenter {
   #tripPointContainer = null;
   #tripPointComponent = null;
   #tripPointFormComponent = null;
+
   #mode = Mode.DEFAULT
 
   /**
