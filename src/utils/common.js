@@ -1,9 +1,9 @@
 import AbstractView from '../view/abstract-view.js';
+import dayjs from 'dayjs';
 
 /**
  *
- * @param {*} component
- * @returns
+ * @param {*} component компонент который будет удален
  */
 export const remove = (component) => {
   if (component === null) {
@@ -20,9 +20,9 @@ export const remove = (component) => {
 
 /**
  *
- * @param {*} items
- * @param {*} update
- * @returns
+ * @param {*} items массив данных с объектами
+ * @param {*} update объект который будет обновлен
+ * @returns массив объектов с обновленным объектом из @update
  */
 export const updateItem = (items, update) => {
   const index = items.findIndex((item) => item.id === update.id);
@@ -36,4 +36,37 @@ export const updateItem = (items, update) => {
     update,
     ...items.slice(index + 1),
   ];
+};
+
+/**
+ *
+ * @param {*} tripPointA объект точки маршрута
+ * @param {*} tripPointB объект точки маршрута
+ * @returns сортировка по длительности от большего к меньшему
+ */
+export const sortDurationDescending = (tripPointA, tripPointB) => {
+  // остается погрешность при сортировке в секундах
+  const tripPointDurationA = dayjs(tripPointA.timeEnd).diff(tripPointA.timeStart, 'minutes');
+  const tripPointDurationB = dayjs(tripPointB.timeEnd).diff(tripPointB.timeStart, 'minutes');
+  return tripPointDurationB - tripPointDurationA;
+};
+
+/**
+ *
+ * @param {*} tripPointA объект точки маршрута
+ * @param {*} tripPointB объект точки маршрута
+ * @returns сортировка по цене от большего к меньшему
+ */
+export const sortPriceDescending = (tripPointA, tripPointB) => (tripPointB.price - tripPointA.price);
+
+/**
+ *
+ * @param {*} tripPointA объект точки маршрута
+ * @param {*} tripPointB объект точки маршрута
+ * @returns сортировка дни по возрастанию
+ */
+export const sortDayAscending = (tripPointA, tripPointB) => {
+  const tripPointDayA = tripPointA.timeStart;
+  const tripPointDayB = tripPointB.timeStart;
+  return dayjs(tripPointDayA).diff(tripPointDayB);
 };

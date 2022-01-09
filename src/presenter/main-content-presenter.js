@@ -5,9 +5,10 @@ import TripPointContainerView from '../view/trip-point-container-view.js';
 import TripPointEmptyView from '../view/trip-point-empty-view.js';
 import TripPointPresenter from './trip-point-presenter.js';
 
-import {updateItem} from '../utils/common.js';
+import {updateItem, sortDurationDescending, sortPriceDescending, sortDayAscending} from '../utils/common.js';
 import {RenderPosition, renderElement} from '../utils/render.js';
 import {FiltersName} from './const.js';
+import {SortType} from '../const.js';
 
 export default class MainContentPresenter {
   #menuContainer = null;
@@ -20,7 +21,6 @@ export default class MainContentPresenter {
   #sortComponent = new SortView();
   #tripPointEmptyComponent = new TripPointEmptyView();
   #tripPointContainerComponent = new TripPointContainerView();
-  #tripPointComponent = null;
 
   #tripPoints = [];
   #tripPointPresenter = new Map();
@@ -33,9 +33,10 @@ export default class MainContentPresenter {
   }
 
   init = (tripPoints) => {
-    this.#tripPoints = tripPoints;
-    // Заготовка для сортировки
-    this.#sourceTripPoints = tripPoints;
+    this.#tripPoints = [...tripPoints];
+    // сортируем дни по возрастанию
+    this.#tripPoints = this.#tripPoints.sort(sortDayAscending);
+    this.#sourceTripPoints = [...this.#tripPoints];
 
     this.#renderMenu();
     this.#renderFilter();
@@ -73,6 +74,27 @@ export default class MainContentPresenter {
 
   #renderSort = () => {
     renderElement(this.#contentContainer, this.#sortComponent, RenderPosition.BEFOREEND);
+    this.#sortComponent.setSortChangeHandler(this.#sortHandler);
+  }
+
+  #sortHandler = (sortType) => {
+    this.#clearTripPointList();
+
+    switch (sortType) {
+      case SortType.DEFAULT:
+        this.#tripPoints = [...this.#sourceTripPoints];
+        break;
+
+      case SortType.TIME:
+        this.#tripPoints.sort(sortDurationDescending);
+        break;
+
+      case SortType.PRICE:
+        this.#tripPoints.sort(sortPriceDescending);
+        break;
+    }
+
+    this.#renderTripPoints();
   }
 
   #renderTripPoint = (tripPointItem) => {
@@ -82,9 +104,8 @@ export default class MainContentPresenter {
     this.#tripPointPresenter.set(tripPointItem.id, tripPointPresenter);
   }
 
-  // заготовка для сортировка
   #clearTripPointList = () => {
-    this.#tripPointPresenter.forEach((presenter) => (presenter.destroy));
+    this.#tripPointPresenter.forEach((presenter) => (presenter.destroy()));
     this.#tripPointPresenter.clear();
   }
 
