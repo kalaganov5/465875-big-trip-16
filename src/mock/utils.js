@@ -24,3 +24,16 @@ export const getRandomInteger = (a = 0, b = 1) => {
 export const getRandomItemArray = (array) => (
   array[getRandomInteger(0, array.length - 1)]
 );
+
+/**
+ *
+ * @param {Array} array массив из описаний
+ * @returns случайное описание строкой
+ */
+export const getRandomDescriptions = (array) => {
+  const randomLength = getRandomInteger(0, array.length - 1);
+  const randomDescription = getRandomItemArray(array);
+  return new Array(randomLength)
+    .fill(randomDescription)
+    .join(' ');
+};
