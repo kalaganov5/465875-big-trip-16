@@ -71,9 +71,12 @@ export default class TripPointPresenter {
   }
 
   #replaceTripPointToForm = () => {
-    this.#tripPointFormComponent = new FormTripPointView(this.#tripPointData);
-    this.#tripPointFormComponent.setFormCloseHandler(this.#replaceFormToTripPoint);
-    this.#tripPointFormComponent.setFormSubmitHandler(this.#replaceFormToTripPoint);
+    // создание компонента только после переключение на него
+    if (this.#tripPointFormComponent === null) {
+      this.#tripPointFormComponent = new FormTripPointView(this.#tripPointData);
+      this.#tripPointFormComponent.setFormCloseHandler(this.#replaceFormToTripPoint);
+      this.#tripPointFormComponent.setFormSubmitHandler(this.#replaceFormToTripPoint);
+    }
 
     replace(this.#tripPointFormComponent, this.#tripPointComponent);
     document.addEventListener('keydown', this.#onEscKeyDown);
