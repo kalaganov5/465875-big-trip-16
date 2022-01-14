@@ -21,3 +21,5 @@ export const FilterNames = {
   past: 'There are no past events now',
   future: 'There are no future events now',
 };
+
+export const ROUTE_TYPES = ['taxi', 'bus', 'train', 'ship', 'drive', 'flight', 'check-in', 'sightseeing', 'restaurant'];
