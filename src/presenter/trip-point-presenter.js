@@ -37,6 +37,10 @@ export default class TripPointPresenter {
     this.#tripPointComponent.setEditTripPointHandler(this.#replaceTripPointToForm);
     this.#tripPointComponent.setToggleFavoritePointHandler(this.#toggleFavoritePoint);
 
+    this.#tripPointFormComponent = new FormTripPointView(this.#tripPointData);
+    this.#tripPointFormComponent.setFormCloseHandler(this.#replaceFormToTripPoint);
+    this.#tripPointFormComponent.setFormSubmitHandler(this.#replaceFormToTripPoint);
+
     if (prevTripPointComponent === null || prevTripPointFormComponent === null) {
       renderElement(this.#tripPointContainer, this.#tripPointComponent, RenderPosition.BEFOREEND);
       return;
@@ -71,13 +75,6 @@ export default class TripPointPresenter {
   }
 
   #replaceTripPointToForm = () => {
-    // создание компонента только после переключение на него
-    if (this.#tripPointFormComponent === null) {
-      this.#tripPointFormComponent = new FormTripPointView(this.#tripPointData);
-      this.#tripPointFormComponent.setFormCloseHandler(this.#replaceFormToTripPoint);
-      this.#tripPointFormComponent.setFormSubmitHandler(this.#replaceFormToTripPoint);
-    }
-
     replace(this.#tripPointFormComponent, this.#tripPointComponent);
     document.addEventListener('keydown', this.#onEscKeyDown);
     this.#changeMode();
