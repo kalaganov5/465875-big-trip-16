@@ -2,6 +2,7 @@ import {TypeIcons, ROUTE_CITIES, ROUTE_TYPES} from './const.js';
 import {humanReadableDate, setIconUrl, generateSelectCities, firstLetterToUpperCase, checkItemInArray} from './utils.js';
 import {ROUTE_POINT_OFFERS, ROUTES_INFO} from '../mock/const.js';
 import SmartView from './smart-view.js';
+import dayjs from 'dayjs';
 
 /**
  *
@@ -181,6 +182,18 @@ export default class FormTripPointView extends SmartView {
       .addEventListener('change', this.#formTypePointHandler);
     this.element.querySelector('.event__input--destination')
       .addEventListener('change', this.#formDestinationPointHandler);
+    this.element.querySelector('.event__input--price')
+      .addEventListener('input', this.#formCostHandler);
+    this.element.querySelector('#event-start-time-1')
+      .addEventListener('input', this.#formTimeStartHandler);
+    this.element.querySelector('#event-end-time-1')
+      .addEventListener('input', this.#formTimeEndHandler);
+  }
+
+  reset = (tripPointData) => {
+    this.updateData(
+      FormTripPointView.parseTripPointToData(tripPointData),
+    );
   }
 
   restoreHandlers = () => {
@@ -232,6 +245,30 @@ export default class FormTripPointView extends SmartView {
           photos: ROUTES_INFO[newDestination].photos
         }
       }
+    );
+  }
+
+  #formCostHandler = (evt) => {
+    evt.preventDefault();
+    this.updateData(
+      {price: evt.target.value,},
+      true,
+    );
+  }
+
+  #formTimeStartHandler = (evt) => {
+    // WIP
+    this.updateData(
+      {timeStart: dayjs(evt.target.value),},
+      true,
+    );
+  }
+
+  #formTimeEndHandler = (evt) => {
+    // WIP
+    this.updateData(
+      {timeEnd: dayjs(new Date(evt.target.value)),},
+      true,
     );
   }
 }
