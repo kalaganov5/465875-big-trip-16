@@ -1,63 +1,28 @@
-import {TypeIcons, ROUTE_CITIES} from './const.js';
-import {humanReadableDate, setIconUrl, generateSelectCities} from './utils.js';
-import AbstractView from './abstract-view.js';
+import {TypeIcons, ROUTE_CITIES, ROUTE_TYPES} from './const.js';
+import {humanReadableDate, setIconUrl, generateSelectCities, firstLetterToUpperCase, checkItemInArray} from './utils.js';
+import {ROUTE_POINT_OFFERS, ROUTES_INFO} from '../mock/const.js';
+import SmartView from './smart-view.js';
+import dayjs from 'dayjs';
 
 /**
  *
  * @returns выпадающий список способов передвижения
  */
-const generateSelectEventType = () => (
-  `<div class="event__type-list">
+const generateSelectEventType = (currentType) => {
+  const typesMarkup = Array.from({length: ROUTE_TYPES.length}, (_, index) => (
+    `<div class="event__type-item">
+      <input id="event-type-${ROUTE_TYPES[index]}-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${ROUTE_TYPES[index]}" ${ROUTE_TYPES[index] === currentType ? 'checked' : ''}>
+      <label class="event__type-label  event__type-label--${ROUTE_TYPES[index]}" for="event-type-${ROUTE_TYPES[index]}-1">${firstLetterToUpperCase(ROUTE_TYPES[index])}</label>
+    </div>`)
+  );
+
+  return `<div class="event__type-list">
   <fieldset class="event__type-group">
     <legend class="visually-hidden">Event type</legend>
-
-    <div class="event__type-item">
-      <input id="event-type-taxi-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="taxi">
-      <label class="event__type-label  event__type-label--taxi" for="event-type-taxi-1">Taxi</label>
-    </div>
-
-    <div class="event__type-item">
-      <input id="event-type-bus-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="bus">
-      <label class="event__type-label  event__type-label--bus" for="event-type-bus-1">Bus</label>
-    </div>
-
-    <div class="event__type-item">
-      <input id="event-type-train-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="train">
-      <label class="event__type-label  event__type-label--train" for="event-type-train-1">Train</label>
-    </div>
-
-    <div class="event__type-item">
-      <input id="event-type-ship-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="ship">
-      <label class="event__type-label  event__type-label--ship" for="event-type-ship-1">Ship</label>
-    </div>
-
-    <div class="event__type-item">
-      <input id="event-type-drive-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="drive">
-      <label class="event__type-label  event__type-label--drive" for="event-type-drive-1">Drive</label>
-    </div>
-
-    <div class="event__type-item">
-      <input id="event-type-flight-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="flight" checked>
-      <label class="event__type-label  event__type-label--flight" for="event-type-flight-1">Flight</label>
-    </div>
-
-    <div class="event__type-item">
-      <input id="event-type-check-in-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="check-in">
-      <label class="event__type-label  event__type-label--check-in" for="event-type-check-in-1">Check-in</label>
-    </div>
-
-    <div class="event__type-item">
-      <input id="event-type-sightseeing-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="sightseeing">
-      <label class="event__type-label  event__type-label--sightseeing" for="event-type-sightseeing-1">Sightseeing</label>
-    </div>
-
-    <div class="event__type-item">
-      <input id="event-type-restaurant-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="restaurant">
-      <label class="event__type-label  event__type-label--restaurant" for="event-type-restaurant-1">Restaurant</label>
-    </div>
+    ${typesMarkup.join('')}
   </fieldset>
-</div>`
-);
+</div>`;
+};
 
 /**
  *
@@ -122,11 +87,10 @@ const setInfo = (description, images) => {
 /**
  *
  * @param {Object} routePoint данные о точке маршрута
- * @param {Boolean} isCreateEvent true если это создание новой точки маршрута
  * @returns заполненная форма создания или редактирования точки маршрута
  */
-const createFormPointTemplate = (routePoint, isCreateEvent) => {
-  const {timeStart, timeEnd, type, destination, price, offers, info} = routePoint;
+const createFormPointTemplate = (routePoint) => {
+  const {timeStart, timeEnd, type, destination, price, offers, info, isCreateTripPoint} = routePoint;
 
   return `<li class="trip-events__item">
     <form class="event event--edit" action="#" method="post">
@@ -137,7 +101,7 @@ const createFormPointTemplate = (routePoint, isCreateEvent) => {
             <img class="event__type-icon" width="17" height="17" src="${setIconUrl(type, TypeIcons)}" alt="Event type icon">
           </label>
           <input class="event__type-toggle  visually-hidden" id="event-type-toggle-1" type="checkbox">
-          ${generateSelectEventType()}
+          ${generateSelectEventType(type)}
         </div>
 
         <div class="event__field-group  event__field-group--destination">
@@ -165,8 +129,8 @@ const createFormPointTemplate = (routePoint, isCreateEvent) => {
         </div>
 
         <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
-        <button class="event__reset-btn" type="reset">${isCreateEvent ? 'Cancel' : 'Delete'}</button>
-        ${isCreateEvent ? '' : '<button class="event__rollup-btn" type="button"><span class="visually-hidden">Open event</span></button>'}
+        <button class="event__reset-btn" type="reset">${isCreateTripPoint ? 'Cancel' : 'Delete'}</button>
+        ${isCreateTripPoint ? '' : '<button class="event__rollup-btn" type="button"><span class="visually-hidden">Open event</span></button>'}
       </header>
       ${offers.length > 0 || Object.keys(info).length > 0 ?`<section class="event__details">
         ${setOffersCreatePoint(offers)}
@@ -180,11 +144,10 @@ const createFormPointTemplate = (routePoint, isCreateEvent) => {
  *
  *
  * @export
- * @class FormTripPointView
+ * @class FormTripPointView форма создание или редактирования точки маршрута
  */
-export default class FormTripPointView extends AbstractView {
-  #tripPoint = null;
-  #isCreateEvent = false;
+export default class FormTripPointView extends SmartView {
+
   /**
    * Creates an instance of FormTripPointView.
    * @param {object} tripPoint данные о точке маршрута
@@ -193,12 +156,50 @@ export default class FormTripPointView extends AbstractView {
    */
   constructor(tripPoint, isCreateRoutePointEvent = false) {
     super();
-    this.#tripPoint = tripPoint;
-    this.#isCreateEvent = isCreateRoutePointEvent;
+    this._data = FormTripPointView.parseTripPointToData(tripPoint, isCreateRoutePointEvent);
+    this.#setInnerHandlers();
   }
 
   get template() {
-    return createFormPointTemplate(this.#tripPoint, this.#isCreateEvent);
+    return createFormPointTemplate(this._data);
+  }
+
+  static parseTripPointToData = (tripPoint, isCreateTripPoint) => ({...tripPoint,
+    isCreateTripPoint,
+  });
+
+  static parseDataToTripPoint = (data) => {
+    const tripPointData = {...data};
+
+    // delete key
+    delete tripPointData.isCreateTripPoint;
+
+    return tripPointData;
+  }
+
+  #setInnerHandlers = () => {
+    this.element.querySelector('.event__type-group')
+      .addEventListener('change', this.#formTypePointHandler);
+    this.element.querySelector('.event__input--destination')
+      .addEventListener('change', this.#formDestinationPointHandler);
+    this.element.querySelector('.event__input--price')
+      .addEventListener('input', this.#formCostHandler);
+    this.element.querySelector('#event-start-time-1')
+      .addEventListener('input', this.#formTimeStartHandler);
+    this.element.querySelector('#event-end-time-1')
+      .addEventListener('input', this.#formTimeEndHandler);
+  }
+
+  reset = (tripPointData) => {
+    this.updateData(
+      FormTripPointView.parseTripPointToData(tripPointData),
+    );
+  }
+
+  restoreHandlers = () => {
+    this.#setInnerHandlers();
+    this.setFormSubmitHandler(this._callback.formSubmitHandler);
+    this.setFormCloseHandler(this._callback.formCloseHandler);
   }
 
   setFormCloseHandler = (callbackFunction) => {
@@ -218,6 +219,56 @@ export default class FormTripPointView extends AbstractView {
 
   #formSubmitHandler = (evt) => {
     evt.preventDefault();
-    this._callback.formSubmitHandler();
+    this._callback.formSubmitHandler(FormTripPointView.parseDataToTripPoint(this._data));
+  }
+
+  #formTypePointHandler = (evt) => {
+    evt.preventDefault();
+    const newType = checkItemInArray(ROUTE_TYPES, evt.target.value);
+
+    this.updateData(
+      {
+        type: newType,
+        offers: ROUTE_POINT_OFFERS[newType],
+      }
+    );
+  }
+
+  #formDestinationPointHandler = (evt) => {
+    evt.preventDefault();
+    const newDestination = checkItemInArray(ROUTE_CITIES, evt.target.value);
+    this.updateData(
+      {
+        destination: newDestination,
+        info: {
+          description: ROUTES_INFO[newDestination].description,
+          photos: ROUTES_INFO[newDestination].photos
+        }
+      }
+    );
+  }
+
+  #formCostHandler = (evt) => {
+    evt.preventDefault();
+    this.updateData(
+      {price: evt.target.value,},
+      true,
+    );
+  }
+
+  #formTimeStartHandler = (evt) => {
+    // WIP
+    this.updateData(
+      {timeStart: dayjs(evt.target.value),},
+      true,
+    );
+  }
+
+  #formTimeEndHandler = (evt) => {
+    // WIP
+    this.updateData(
+      {timeEnd: dayjs(new Date(evt.target.value)),},
+      true,
+    );
   }
 }

@@ -60,3 +60,18 @@ export const generateSelectCities = (cities) => {
     </datalist>
   `;
 };
+
+/**
+ *
+ * @param {String} string где нужно поменять регистр
+ * @returns Вернёт строку, где первый символ будет заглавным
+ */
+export const firstLetterToUpperCase = (string) => (string[0].toUpperCase() + string.slice(1));
+
+/**
+ *
+ * @param {array} elements массив элементов
+ * @param {*} value проверяемый элемент
+ * @returns если значение существует вернёт его
+ */
+export const checkItemInArray = (elements, value) => (elements.includes(value) ? value : '');
