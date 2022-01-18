@@ -3,6 +3,9 @@ import {humanReadableDate, setIconUrl, generateSelectCities, firstLetterToUpperC
 import {ROUTE_POINT_OFFERS, ROUTES_INFO} from '../mock/const.js';
 import SmartView from './smart-view.js';
 import dayjs from 'dayjs';
+import flatpickr from 'flatpickr';
+
+import '../../node_modules/flatpickr/dist/flatpickr.min.css';
 
 /**
  *
