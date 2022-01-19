@@ -2,7 +2,9 @@ import {TypeIcons, ROUTE_CITIES, ROUTE_TYPES} from './const.js';
 import {humanReadableDate, setIconUrl, generateSelectCities, firstLetterToUpperCase, checkItemInArray} from './utils.js';
 import {ROUTE_POINT_OFFERS, ROUTES_INFO} from '../mock/const.js';
 import SmartView from './smart-view.js';
-import dayjs from 'dayjs';
+import flatpickr from 'flatpickr';
+
+import '../../node_modules/flatpickr/dist/flatpickr.min.css';
 
 /**
  *
@@ -147,6 +149,8 @@ const createFormPointTemplate = (routePoint) => {
  * @class FormTripPointView форма создание или редактирования точки маршрута
  */
 export default class FormTripPointView extends SmartView {
+  #datepickerStart = null;
+  #datepickerEnd = null;
 
   /**
    * Creates an instance of FormTripPointView.
@@ -158,6 +162,22 @@ export default class FormTripPointView extends SmartView {
     super();
     this._data = FormTripPointView.parseTripPointToData(tripPoint, isCreateRoutePointEvent);
     this.#setInnerHandlers();
+  }
+
+  // Перегружаем метод родителя removeElement,
+  // чтобы при удалении удалялся более не нужный календарь
+  removeElement = () => {
+    super.removeElement();
+
+    if (this.#datepickerStart) {
+      this.#datepickerStart.destroy();
+      this.#datepickerStart = null;
+    }
+
+    if (this.#datepickerEnd) {
+      this.#datepickerEnd.destroy();
+      this.#datepickerStart = null;
+    }
   }
 
   get template() {
@@ -184,10 +204,9 @@ export default class FormTripPointView extends SmartView {
       .addEventListener('change', this.#formDestinationPointHandler);
     this.element.querySelector('.event__input--price')
       .addEventListener('input', this.#formCostHandler);
-    this.element.querySelector('#event-start-time-1')
-      .addEventListener('input', this.#formTimeStartHandler);
-    this.element.querySelector('#event-end-time-1')
-      .addEventListener('input', this.#formTimeEndHandler);
+
+    this.#setDatepickerStart();
+    this.#setDatepickerEnd();
   }
 
   reset = (tripPointData) => {
@@ -256,18 +275,46 @@ export default class FormTripPointView extends SmartView {
     );
   }
 
-  #formTimeStartHandler = (evt) => {
-    // WIP
+  #setDatepickerStart = () => {
+    this.#datepickerStart = flatpickr(
+      this.element.querySelector('#event-start-time-1'),
+      {
+        enableTime: true,
+        // eslint-disable-next-line camelcase
+        time_24hr: true,
+        dateFormat: 'd/m/Y H:i',
+        maxDate: flatpickr.parseDate(this._data.timeEnd),
+        defaultDate: this._data.timeStart,
+        onChange: this.#formTimeStartHandler,
+      },
+    );
+  }
+
+  #formTimeStartHandler = ([userDateTimeStart]) => {
     this.updateData(
-      {timeStart: dayjs(evt.target.value),},
+      {timeStart: userDateTimeStart,},
       true,
     );
   }
 
-  #formTimeEndHandler = (evt) => {
-    // WIP
+  #setDatepickerEnd = () => {
+    this.#datepickerEnd = flatpickr(
+      this.element.querySelector('#event-end-time-1'),
+      {
+        enableTime: true,
+        // eslint-disable-next-line camelcase
+        time_24hr: true,
+        dateFormat: 'd/m/Y H:i',
+        minDate: flatpickr.parseDate(this._data.timeStart),
+        defaultDate: this._data.timeEnd,
+        onChange: this.#formTimeEndHandler,
+      },
+    );
+  }
+
+  #formTimeEndHandler = ([userDateTimeEnd]) => {
     this.updateData(
-      {timeEnd: dayjs(new Date(evt.target.value)),},
+      {timeEnd: userDateTimeEnd,},
       true,
     );
   }
