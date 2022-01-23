@@ -4,6 +4,7 @@ import FormTripPointView from '../view/form-trip-point-view.js';
 import {renderElement, replace, RenderPosition} from '../utils/render.js';
 import {remove} from '../utils/common.js';
 import {Mode} from './const.js';
+import {UserAction, UpdateType} from '../const.js';
 
 export default class TripPointPresenter {
   #tripPointData = null;
@@ -91,6 +92,10 @@ export default class TripPointPresenter {
   }
 
   #toggleFavoritePoint = () => {
-    this.#changeData({...this.#tripPointData, isFavorite: !this.#tripPointData.isFavorite});
+    this.#changeData(
+      UserAction.UPDATE_ROUTE_POINT,
+      UpdateType.MINOR,
+      {...this.#tripPointData, isFavorite: !this.#tripPointData.isFavorite}
+    );
   }
 }

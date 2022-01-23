@@ -8,7 +8,7 @@ import TripPointPresenter from './trip-point-presenter.js';
 import {updateItem, sortDurationDescending, sortPriceDescending} from '../utils/common.js';
 import {RenderPosition, renderElement} from '../utils/render.js';
 import {FiltersName} from './const.js';
-import {SortType} from '../const.js';
+import {SortType, UserAction, UpdateType} from '../const.js';
 
 export default class MainContentPresenter {
   #menuContainer = null;
@@ -41,6 +41,7 @@ export default class MainContentPresenter {
     this.#contentContainer = contentContainer;
 
     this.#routePointsModel = routePointsModel;
+    this.#routePointsModel.addObserver(this.#handleModelEvent);
   }
 
   get routePoints() {
@@ -62,6 +63,45 @@ export default class MainContentPresenter {
     this.#renderTripPointContainer();
 
     this.#renderTripPoints();
+  }
+
+  #handleViewAction = (actionType, updateType, update) => {
+    console.log(actionType, updateType, update);
+    // Здесь будем вызывать обновление модели.
+    // actionType - действие пользователя, нужно чтобы понять, какой метод модели вызвать
+    // updateType - тип изменений, нужно чтобы понять, что после нужно обновить
+    // update - обновленные данные
+    switch (actionType) {
+      case (UserAction.UPDATE_ROUTE_POINT):
+        this.#routePointsModel.updateRoutePoints(updateType, update);
+        break;
+      case (UserAction.ADD_ROUTE_POINT):
+        this.#routePointsModel.addRoutePoint(updateType, update);
+        break;
+      case (UserAction.DELETE_ROUTE_POINT):
+        this.#routePointsModel.deleteRoutePoint(updateType, update);
+    }
+  }
+
+  #handleModelEvent = (updateType, data) => {
+    console.log(updateType, data);
+    // WIP
+    // В зависимости от типа изменений решаем, что делать:
+    // - обновить часть списка (например, когда поменялось описание)
+    // - обновить список (например, когда задача ушла в архив)
+    // - обновить всю доску (например, при переключении фильтра)
+    switch (updateType) {
+      case (UpdateType.MINOR):
+        // - обновить список (например, когда задача ушла в архив)
+        this.#tripPointPresenter.get(data.id).init(data);
+        break;
+      case UpdateType.PATCH:
+        // - обновить часть списка (например, когда поменялось описание)
+        break;
+      case UpdateType.MAJOR:
+        // - обновить всю доску (например, при переключении фильтра)
+        break;
+    }
   }
 
   #handleTripPoints = (updatedTripPoint) => {
@@ -106,7 +146,7 @@ export default class MainContentPresenter {
 
   #renderTripPoint = (tripPointItem) => {
     // рендер одной точки маршрута
-    const tripPointPresenter = new TripPointPresenter(this.#tripPointContainerComponent, this.#handleTripPoints, this.#handleModeChange);
+    const tripPointPresenter = new TripPointPresenter(this.#tripPointContainerComponent, this.#handleViewAction, this.#handleModeChange);
     tripPointPresenter.init(tripPointItem);
     this.#tripPointPresenter.set(tripPointItem.id, tripPointPresenter);
   }
