@@ -16,6 +16,8 @@ export default class MainContentPresenter {
   #contentContainer = null;
   #filterName = FiltersName.EVERYTHING;
 
+  #routePointsModel = null;
+
   #menuComponent = new MenuView();
   #filterComponent = new FilterView();
   #sortComponent = new SortView();
@@ -25,11 +27,24 @@ export default class MainContentPresenter {
   #tripPoints = [];
   #tripPointPresenter = new Map();
   #sourceTripPoints = [];
-
-  constructor (menuContainer, filterContainer, contentContainer) {
+  /**
+   * Creates an instance of MainContentPresenter.
+   * @param {*} menuContainer
+   * @param {*} filterContainer
+   * @param {*} contentContainer
+   * @param {*} routePointsModel
+   * @memberof MainContentPresenter
+   */
+  constructor (menuContainer, filterContainer, contentContainer, routePointsModel) {
     this.#menuContainer = menuContainer;
     this.#filterContainer = filterContainer;
     this.#contentContainer = contentContainer;
+
+    this.#routePointsModel = routePointsModel;
+  }
+
+  get routePoints() {
+    return this.#routePointsModel.routePoints;
   }
 
   init = (tripPoints) => {
