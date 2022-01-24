@@ -1,4 +1,4 @@
-import {FilterNames} from './const.js';
+import {FiltersText} from './const.js';
 import AbstractView from './abstract-view.js';
 
 export default class TripPointEmptyView extends AbstractView {
@@ -10,6 +10,6 @@ export default class TripPointEmptyView extends AbstractView {
   }
 
   get template() {
-    return `<p class="trip-events__msg">${FilterNames[this.#currentFilterName]}</p>`;
+    return `<p class="trip-events__msg">${FiltersText[this.#currentFilterName]}</p>`;
   }
 }
