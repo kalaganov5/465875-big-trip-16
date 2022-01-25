@@ -20,6 +20,7 @@ const getRandomDateTime = (start = 0, end = 7) => (
     .add(getRandomInteger(0, HOUR_IN_DAY), 'hour')
     .add(getRandomInteger(0, MINUTE_IN_HOUR), 'minute')
     .add(getRandomInteger(start, end), 'day')
+    .subtract(getRandomInteger(0, 3), 'day')
     .toDate()
 );
 
