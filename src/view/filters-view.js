@@ -1,20 +1,20 @@
 import AbstractView from './abstract-view.js';
 import {FilterType} from '../const.js';
 
-const createFilterTemplate = () => (
+const createFilterTemplate = (currentFilterType) => (
   `<form class="trip-filters" action="#" method="get">
     <div class="trip-filters__filter">
-      <input id="filter-everything" class="trip-filters__filter-input  visually-hidden" type="radio" name="trip-filter" value="everything" data-filter-type="${FilterType.EVERYTHING}" checked>
+      <input id="filter-everything" class="trip-filters__filter-input  visually-hidden" type="radio" name="trip-filter" value="everything" data-filter-type="${FilterType.EVERYTHING}" ${FilterType.EVERYTHING === currentFilterType ? 'checked': ''}>
       <label class="trip-filters__filter-label" for="filter-everything">Everything</label>
     </div>
 
     <div class="trip-filters__filter">
-      <input id="filter-future" class="trip-filters__filter-input  visually-hidden" type="radio" name="trip-filter" value="future" data-filter-type="${FilterType.FUTURE}">
+      <input id="filter-future" class="trip-filters__filter-input  visually-hidden" type="radio" name="trip-filter" value="future" data-filter-type="${FilterType.FUTURE}" ${FilterType.FUTURE === currentFilterType ? 'checked': ''}>
       <label class="trip-filters__filter-label" for="filter-future">Future</label>
     </div>
 
     <div class="trip-filters__filter">
-      <input id="filter-past" class="trip-filters__filter-input  visually-hidden" type="radio" name="trip-filter" value="past" data-filter-type="${FilterType.PAST}">
+      <input id="filter-past" class="trip-filters__filter-input  visually-hidden" type="radio" name="trip-filter" value="past" data-filter-type="${FilterType.PAST}" ${FilterType.PAST === currentFilterType ? 'checked': ''}>
       <label class="trip-filters__filter-label" for="filter-past">Past</label>
     </div>
 
@@ -23,8 +23,15 @@ const createFilterTemplate = () => (
 );
 
 export default class FilterView extends AbstractView {
+  #currentFilter = null;
+
+  constructor (currentFilterType) {
+    super();
+    this.#currentFilter = currentFilterType;
+  }
+
   get template () {
-    return createFilterTemplate();
+    return createFilterTemplate(this.#currentFilter);
   }
 
   setFilterHandler = (callbackFunction) => {

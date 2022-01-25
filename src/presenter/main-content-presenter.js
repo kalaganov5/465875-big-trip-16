@@ -1,28 +1,27 @@
-import FilterView from '../view/filters-view.js';
+// import FilterView from '../view/filters-view.js';
 import MenuView from '../view/menu-view.js';
 import SortView from '../view/sort-view.js';
 import TripPointContainerView from '../view/trip-point-container-view.js';
 import TripPointEmptyView from '../view/trip-point-empty-view.js';
 import TripPointPresenter from './trip-point-presenter.js';
 
-import {updateItem, sortDurationDescending, sortPriceDescending} from '../utils/common.js';
+import {filter} from '../utils/filter.js';
+
+import {sortDurationDescending, sortPriceDescending, remove} from '../utils/common.js';
 import {RenderPosition, renderElement} from '../utils/render.js';
-import {FiltersName} from './const.js';
 import {SortType, UserAction, UpdateType} from '../const.js';
 
 export default class MainContentPresenter {
   #menuContainer = null;
-  #filterContainer = null;
   #contentContainer = null;
-  #filterName = FiltersName.EVERYTHING;
 
   #currentSortType = SortType.DEFAULT;
 
   #routePointsModel = null;
+  #filterModel = null;
 
-  #menuComponent = new MenuView();
-  #filterComponent = new FilterView();
-  #sortComponent = new SortView();
+  #menuComponent = null;
+  #sortComponent = null;
   #tripPointEmptyComponent = new TripPointEmptyView();
   #tripPointContainerComponent = new TripPointContainerView();
 
@@ -35,30 +34,35 @@ export default class MainContentPresenter {
    * @param {*} routePointsModel
    * @memberof MainContentPresenter
    */
-  constructor (menuContainer, filterContainer, contentContainer, routePointsModel) {
+  constructor (menuContainer, filterContainer, contentContainer, routePointsModel, filterModel) {
     this.#menuContainer = menuContainer;
-    this.#filterContainer = filterContainer;
     this.#contentContainer = contentContainer;
 
     this.#routePointsModel = routePointsModel;
     this.#routePointsModel.addObserver(this.#handleModelEvent);
+
+    this.#filterModel = filterModel;
+    this.#filterModel.addObserver(this.#handleModelEvent);
   }
 
   get routePoints() {
+    const filterType = this.#filterModel.filterType;
+    const routePoints = this.#routePointsModel.routePoints;
+    const filteredRoutePoints = filter[filterType](routePoints);
     switch (this.#currentSortType) {
       case SortType.PRICE:
-        return [...this.#routePointsModel.routePoints].sort(sortPriceDescending);
+        return filteredRoutePoints.sort(sortPriceDescending);
       case SortType.TIME:
-        return [...this.#routePointsModel.routePoints].sort(sortDurationDescending);
+        return filteredRoutePoints.sort(sortDurationDescending);
     }
-    return this.#routePointsModel.routePoints;
+    return filteredRoutePoints;
   }
 
   init = () => {
-
-
-    this.#renderMenu();
-    this.#renderFilter();
+    if (this.#menuComponent === null) {
+      this.#menuComponent = new MenuView();
+      this.#renderMenu();
+    }
 
     this.#renderTripPointContainer();
 
@@ -100,14 +104,12 @@ export default class MainContentPresenter {
         break;
       case UpdateType.MAJOR:
         // - обновить всю доску (например, при переключении фильтра)
+        this.#clearContent();
+        this.init();
         break;
     }
   }
 
-  #handleTripPoints = (updatedTripPoint) => {
-    this.routePoints = updateItem(this.routePoints, updatedTripPoint);
-    this.#tripPointPresenter.get(updatedTripPoint.id).init(updatedTripPoint);
-  }
 
   #handleModeChange = () => {
     this.#tripPointPresenter.forEach((presenter) => presenter.resetView());
@@ -115,10 +117,6 @@ export default class MainContentPresenter {
 
   #renderMenu = () => {
     renderElement(this.#menuContainer, this.#menuComponent, RenderPosition.BEFOREEND);
-  }
-
-  #renderFilter = () => {
-    renderElement(this.#filterContainer, this.#filterComponent, RenderPosition.BEFOREEND);
   }
 
   #renderTripPointContainer = () => {
@@ -131,6 +129,7 @@ export default class MainContentPresenter {
   }
 
   #renderSort = () => {
+    this.#sortComponent = new SortView();
     renderElement(this.#contentContainer, this.#sortComponent, RenderPosition.BEFOREEND);
     this.#sortComponent.setSortChangeHandler(this.#sortHandler);
   }
@@ -139,7 +138,6 @@ export default class MainContentPresenter {
     this.#clearTripPointList();
 
     this.#currentSortType = sortType;
-
 
     this.#renderTripPoints();
   }
@@ -154,6 +152,11 @@ export default class MainContentPresenter {
   #clearTripPointList = () => {
     this.#tripPointPresenter.forEach((presenter) => (presenter.destroy()));
     this.#tripPointPresenter.clear();
+  }
+
+  #clearContent = () => {
+    remove(this.#sortComponent);
+    this.#clearTripPointList();
   }
 
   #renderTripPoints = () => {
