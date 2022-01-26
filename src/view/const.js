@@ -17,9 +17,9 @@ export const ROUTE_CITIES = ['Amsterdam', 'Chamonix', 'Geneva', 'Dublin', 'Kanpu
  * Значение отображаемого текста для фильтра меню
  */
 export const FiltersText = {
-  everything: 'Click New Event to create your first point',
-  past: 'There are no past events now',
-  future: 'There are no future events now',
+  EVERYTHING: 'Click New Event to create your first point',
+  PAST: 'There are no past events now',
+  FUTURE: 'There are no future events now',
 };
 
 export const ROUTE_TYPES = ['taxi', 'bus', 'train', 'ship', 'drive', 'flight', 'check-in', 'sightseeing', 'restaurant'];

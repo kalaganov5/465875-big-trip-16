@@ -1,4 +1,3 @@
-// import FilterView from '../view/filters-view.js';
 import MenuView from '../view/menu-view.js';
 import SortView from '../view/sort-view.js';
 import TripPointContainerView from '../view/trip-point-container-view.js';
@@ -7,7 +6,7 @@ import TripPointPresenter from './trip-point-presenter.js';
 
 import {filter} from '../utils/filter.js';
 
-import {sortDurationDescending, sortPriceDescending, remove} from '../utils/common.js';
+import {sortDurationDescending, sortPriceDescending, sortDayAscending, remove} from '../utils/common.js';
 import {RenderPosition, renderElement} from '../utils/render.js';
 import {SortType, UserAction, UpdateType} from '../const.js';
 
@@ -16,13 +15,14 @@ export default class MainContentPresenter {
   #contentContainer = null;
 
   #currentSortType = SortType.DEFAULT;
+  #filterType = null;
 
   #routePointsModel = null;
   #filterModel = null;
 
   #menuComponent = null;
   #sortComponent = null;
-  #tripPointEmptyComponent = new TripPointEmptyView();
+  #tripPointEmptyComponent = null;
   #tripPointContainerComponent = new TripPointContainerView();
 
   #tripPointPresenter = new Map();
@@ -46,16 +46,16 @@ export default class MainContentPresenter {
   }
 
   get routePoints() {
-    const filterType = this.#filterModel.filterType;
+    this.#filterType = this.#filterModel.filterType;
     const routePoints = this.#routePointsModel.routePoints;
-    const filteredRoutePoints = filter[filterType](routePoints);
+    const filteredRoutePoints = filter[this.#filterType](routePoints);
     switch (this.#currentSortType) {
       case SortType.PRICE:
         return filteredRoutePoints.sort(sortPriceDescending);
       case SortType.TIME:
         return filteredRoutePoints.sort(sortDurationDescending);
     }
-    return filteredRoutePoints;
+    return filteredRoutePoints.sort(sortDayAscending);
   }
 
   init = () => {
@@ -103,8 +103,8 @@ export default class MainContentPresenter {
         // - обновить часть списка (например, когда поменялось описание)
         break;
       case UpdateType.MAJOR:
-        // - обновить всю доску (например, при переключении фильтра)
         this.#clearContent();
+        this.#currentSortType = SortType.DEFAULT;
         this.init();
         break;
     }
@@ -156,6 +156,9 @@ export default class MainContentPresenter {
 
   #clearContent = () => {
     remove(this.#sortComponent);
+    if (this.#tripPointEmptyComponent) {
+      remove(this.#tripPointEmptyComponent);
+    }
     this.#clearTripPointList();
   }
 
@@ -166,6 +169,7 @@ export default class MainContentPresenter {
   }
 
   #renderNoTripPoint = () => {
+    this.#tripPointEmptyComponent = new TripPointEmptyView(this.#filterType);
     renderElement(this.#contentContainer, this.#tripPointEmptyComponent, RenderPosition.BEFOREEND);
   }
 }
