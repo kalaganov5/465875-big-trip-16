@@ -42,6 +42,7 @@ const setOffersCreatePoint = (offers) => {
         id="event-offers[index]-${index}"
         type="checkbox"
         name="event-offers[index]-${offers[index].title.toLowerCase().replaceAll(' ', '-')}"
+        data-offer-id="${offers[index].id}"
         ${offers[index].isSelect ? 'checked' : ''}>
       <label class="event__offer-label" for="event-offers[index]-${index}">
         <span class="event__offer-title">${offers[index].title}</span>
@@ -151,6 +152,7 @@ const createFormPointTemplate = (routePoint) => {
 export default class FormTripPointView extends SmartView {
   #datepickerStart = null;
   #datepickerEnd = null;
+  #sourceTripPointOffers = null;
 
   /**
    * Creates an instance of FormTripPointView.
@@ -162,6 +164,7 @@ export default class FormTripPointView extends SmartView {
     super();
     this._data = FormTripPointView.parseTripPointToData(tripPoint, isCreateRoutePointEvent);
     this.#setInnerHandlers();
+    this.#sourceTripPointOffers = JSON.parse(JSON.stringify(this._data.offers));
   }
 
   // Перегружаем метод родителя removeElement,
@@ -202,6 +205,11 @@ export default class FormTripPointView extends SmartView {
       .addEventListener('change', this.#formTypePointHandler);
     this.element.querySelector('.event__input--destination')
       .addEventListener('change', this.#formDestinationPointHandler);
+    if (this._data.offers.length > 0) {
+      this.element.querySelector('.event__available-offers')
+        .addEventListener('change', this.#formOffersPointHandler);
+    }
+
     this.element.querySelector('.event__input--price')
       .addEventListener('input', this.#formCostHandler);
 
@@ -210,6 +218,11 @@ export default class FormTripPointView extends SmartView {
   }
 
   reset = (tripPointData) => {
+    // Сброс выбранных оферов т.к. в this.#formOffersPointHandler идет обновление сразу
+    for (let i = 0; i < this._data.offers.length; i++) {
+      this._data.offers[i].isSelect = this.#sourceTripPointOffers[i].isSelect;
+    }
+    // Сброс выбранных оферов т.к. в this.#formOffersPointHandler идет обновление сразу
     this.updateData(
       FormTripPointView.parseTripPointToData(tripPointData),
     );
@@ -273,6 +286,19 @@ export default class FormTripPointView extends SmartView {
       {price: evt.target.value,},
       true,
     );
+  }
+
+  #formOffersPointHandler = (evt) => {
+    evt.preventDefault();
+
+    const offerId = evt.target.dataset.offerId;
+    const offers = this._data.offers;
+    for (let i = 0; i < offers.length; i++) {
+      if(offers[i].id === offerId) {
+        offers[i].isSelect = !offers[i].isSelect;
+        break;
+      }
+    }
   }
 
   #setDatepickerStart = () => {
