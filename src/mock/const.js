@@ -1,3 +1,4 @@
+import {nanoid} from 'nanoid';
 import {getRandomInteger, getRandomDescriptions} from './utils.js';
 
 const ROUTE_POINT_PHOTOS_COUNT = 5;
@@ -21,21 +22,25 @@ export const ROUTE_CITIES = ['Amsterdam', 'Chamonix', 'Geneva', 'Dublin', 'Kanpu
 export const ROUTE_POINT_OFFERS = {
   'taxi': [
     {
+      'id': nanoid(),
       'title': 'Switch to comfort class',
       'price': 48,
       'isSelect': false
     },
     {
+      'id': nanoid(),
       'title': 'Order Uber',
       'price': 16,
       'isSelect': false
     },
     {
+      'id': nanoid(),
       'title': 'Add meal',
       'price': 79,
       'isSelect': false
     },
     {
+      'id': nanoid(),
       'title': 'Choose seats',
       'price': 52,
       'isSelect': false
@@ -43,6 +48,7 @@ export const ROUTE_POINT_OFFERS = {
   ],
   'drive': [
     {
+      'id': nanoid(),
       'title': 'Switch to comfort class',
       'price': 22,
       'isSelect': false
@@ -50,6 +56,7 @@ export const ROUTE_POINT_OFFERS = {
   ],
   'ship': [
     {
+      'id': nanoid(),
       'title': 'Switch to comfort class',
       'price': 76,
       'isSelect': false
@@ -59,21 +66,25 @@ export const ROUTE_POINT_OFFERS = {
   'flight': [],
   'sightseeing': [
     {
+      'id': nanoid(),
       'title': 'Switch to comfort class',
       'price': 42,
       'isSelect': false
     },
     {
+      'id': nanoid(),
       'title': 'Order Uber',
       'price': 5,
       'isSelect': true
     },
     {
+      'id': nanoid(),
       'title': 'Add meal',
       'price': 40,
       'isSelect': false
     },
     {
+      'id': nanoid(),
       'title': 'Choose seats',
       'price': 76,
       'isSelect': false
@@ -81,6 +92,7 @@ export const ROUTE_POINT_OFFERS = {
   ],
   'bus': [
     {
+      'id': nanoid(),
       'title': 'Switch to comfort class',
       'price': 78,
       'isSelect': false
@@ -88,21 +100,25 @@ export const ROUTE_POINT_OFFERS = {
   ],
   'train': [
     {
+      'id': nanoid(),
       'title': 'Switch to comfort class',
       'price': 98,
       'isSelect': false
     },
     {
+      'id': nanoid(),
       'title': 'Order Uber',
       'price': 63,
       'isSelect': false
     },
     {
+      'id': nanoid(),
       'title': 'Add meal',
       'price': 36,
       'isSelect': false
     },
     {
+      'id': nanoid(),
       'title': 'Choose seats',
       'price': 35,
       'isSelect': false
@@ -110,16 +126,19 @@ export const ROUTE_POINT_OFFERS = {
   ],
   'check-in': [
     {
+      'id': nanoid(),
       'title': 'Switch to comfort class',
       'price': 26,
       'isSelect': false
     },
     {
+      'id': nanoid(),
       'title': 'Order Uber',
       'price': 30,
       'isSelect': false
     },
     {
+      'id': nanoid(),
       'title': 'Add meal',
       'price': 93,
       'isSelect': false
