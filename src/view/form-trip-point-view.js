@@ -31,26 +31,27 @@ const generateSelectEventType = (currentType) => {
  * @param {Array} offers массив объектов с опциями для точки маршрута
  * @returns разметка с предложениями для поездки или ничего
  */
-const setOffersCreatePoint = (offers) => {
+const setOffersCreatePoint = (offers, offersSelected) => {
   if (offers.length === 0) {
     return '';
   }
 
-  const offerMarkup = Array.from({length: offers.length}, (_, index) => (
-    `<div class="event__offer-selector">
+  const offerMarkup = Array.from({length: offers.length}, (_, index) => {
+    const isSelected = offersSelected.some((offer) => (offer.id === offers[index].id));
+    return `<div class="event__offer-selector">
       <input class="event__offer-checkbox  visually-hidden"
         id="event-offers[index]-${index}"
         type="checkbox"
         name="event-offers[index]-${offers[index].title.toLowerCase().replaceAll(' ', '-')}"
         data-offer-id="${offers[index].id}"
-        ${offers[index].isSelect ? 'checked' : ''}>
+        ${isSelected ? 'checked' : ''}>
       <label class="event__offer-label" for="event-offers[index]-${index}">
         <span class="event__offer-title">${offers[index].title}</span>
         &plus;&euro;&nbsp;
         <span class="event__offer-price">${offers[index].price}</span>
       </label>
-    </div>`)
-  );
+    </div>`;
+  });
 
   return `
   <section class="event__section  event__section--offers">
@@ -94,7 +95,7 @@ const setInfo = (description, images) => {
  */
 const createFormPointTemplate = (routePoint) => {
   const {timeStart, timeEnd, type, destination, price, offers, info, isCreateTripPoint} = routePoint;
-
+  const offersCurrentType = ROUTE_POINT_OFFERS[type];
   return `<li class="trip-events__item">
     <form class="event event--edit" action="#" method="post">
       <header class="event__header">
@@ -135,8 +136,8 @@ const createFormPointTemplate = (routePoint) => {
         <button class="event__reset-btn" type="reset">${isCreateTripPoint ? 'Cancel' : 'Delete'}</button>
         ${isCreateTripPoint ? '' : '<button class="event__rollup-btn" type="button"><span class="visually-hidden">Open event</span></button>'}
       </header>
-      ${offers.length > 0 || Object.keys(info).length > 0 ?`<section class="event__details">
-        ${setOffersCreatePoint(offers)}
+      ${offersCurrentType.length > 0 || Object.keys(info).length > 0 ?`<section class="event__details">
+        ${setOffersCreatePoint(offersCurrentType, offers)}
         ${setInfo(info.description, info.photos)}
       </section>`: ''}
     </form>
@@ -152,7 +153,6 @@ const createFormPointTemplate = (routePoint) => {
 export default class FormTripPointView extends SmartView {
   #datepickerStart = null;
   #datepickerEnd = null;
-  #sourceTripPointOffers = null;
 
   /**
    * Creates an instance of FormTripPointView.
@@ -164,7 +164,6 @@ export default class FormTripPointView extends SmartView {
     super();
     this._data = FormTripPointView.parseTripPointToData(tripPoint, isCreateRoutePointEvent);
     this.#setInnerHandlers();
-    this.#sourceTripPointOffers = JSON.parse(JSON.stringify(this._data.offers));
   }
 
   // Перегружаем метод родителя removeElement,
@@ -205,9 +204,10 @@ export default class FormTripPointView extends SmartView {
       .addEventListener('change', this.#formTypePointHandler);
     this.element.querySelector('.event__input--destination')
       .addEventListener('change', this.#formDestinationPointHandler);
-    if (this._data.offers.length > 0) {
-      this.element.querySelector('.event__available-offers')
-        .addEventListener('change', this.#formOffersPointHandler);
+
+    const offersElement = this.element.querySelector('.event__available-offers');
+    if (offersElement) {
+      offersElement.addEventListener('change', this.#formOffersPointHandler);
     }
 
     this.element.querySelector('.event__input--price')
@@ -218,11 +218,6 @@ export default class FormTripPointView extends SmartView {
   }
 
   reset = (tripPointData) => {
-    // Сброс выбранных оферов т.к. в this.#formOffersPointHandler идет обновление сразу
-    for (let i = 0; i < this._data.offers.length; i++) {
-      this._data.offers[i].isSelect = this.#sourceTripPointOffers[i].isSelect;
-    }
-    // Сброс выбранных оферов т.к. в this.#formOffersPointHandler идет обновление сразу
     this.updateData(
       FormTripPointView.parseTripPointToData(tripPointData),
     );
@@ -261,7 +256,7 @@ export default class FormTripPointView extends SmartView {
     this.updateData(
       {
         type: newType,
-        offers: ROUTE_POINT_OFFERS[newType],
+        offers: [],
       }
     );
   }
@@ -290,15 +285,19 @@ export default class FormTripPointView extends SmartView {
 
   #formOffersPointHandler = (evt) => {
     evt.preventDefault();
+    let pointOffers = [...this._data.offers];
+    const changedOfferId = evt.target.dataset.offerId;
+    const changedOffer = ROUTE_POINT_OFFERS[this._data.type].find((offer) => (offer.id === changedOfferId));
 
-    const offerId = evt.target.dataset.offerId;
-    const offers = this._data.offers;
-    for (let i = 0; i < offers.length; i++) {
-      if(offers[i].id === offerId) {
-        offers[i].isSelect = !offers[i].isSelect;
-        break;
-      }
+    if (evt.target.checked) {
+      pointOffers.push(changedOffer);
+    } else {
+      pointOffers = pointOffers.filter((offer) => (offer.id !== changedOfferId));
     }
+    this.updateData(
+      {offers: [...pointOffers]},
+      true,
+    );
   }
 
   #setDatepickerStart = () => {
