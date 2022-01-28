@@ -70,6 +70,9 @@ const setOffersCreatePoint = (offers, offersSelected) => {
  * @returns
  */
 const setInfo = (description, images) => {
+  if (description === '' && images.length === 0) {
+    return '';
+  }
   const imageLayout = [];
   for (const image of images) {
     imageLayout.push(`<img class="event__photo" src="${image}" alt="Event photo"></img>`);
