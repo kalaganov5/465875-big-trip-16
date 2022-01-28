@@ -41,6 +41,7 @@ export default class TripPointPresenter {
     this.#tripPointFormComponent = new FormTripPointView(this.#tripPointData);
     this.#tripPointFormComponent.setFormCloseHandler(this.#formCloseHandler);
     this.#tripPointFormComponent.setFormSubmitHandler(this.#formSubmitHandler);
+    this.#tripPointFormComponent.setDeleteHandler(this.#formDeleteHandler);
 
     if (prevTripPointComponent === null || prevTripPointFormComponent === null) {
       renderElement(this.#tripPointContainer, this.#tripPointComponent, RenderPosition.BEFOREEND);
@@ -110,5 +111,13 @@ export default class TripPointPresenter {
 
   #formCloseHandler = () => {
     this.resetView();
+  }
+
+  #formDeleteHandler = () => {
+    this.#changeData(
+      UserAction.DELETE_ROUTE_POINT,
+      UpdateType.MAJOR,
+      this.#tripPointData,
+    );
   }
 }

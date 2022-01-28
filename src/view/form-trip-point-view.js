@@ -230,6 +230,7 @@ export default class FormTripPointView extends SmartView {
     this.#setInnerHandlers();
     this.setFormSubmitHandler(this._callback.formSubmitHandler);
     this.setFormCloseHandler(this._callback.formCloseHandler);
+    this.setDeleteHandler(this._callback.formDeleteHandler);
   }
 
   setFormCloseHandler = (callbackFunction) => {
@@ -345,5 +346,15 @@ export default class FormTripPointView extends SmartView {
       {timeEnd: userDateTimeEnd,},
       true,
     );
+  }
+
+  setDeleteHandler = (callbackFunction) => {
+    this._callback.formDeleteHandler = callbackFunction;
+    this.element.querySelector('.event__reset-btn').addEventListener('click', this.#deleteHandler);
+  }
+
+  #deleteHandler = (evt) => {
+    evt.preventDefault();
+    this._callback.formDeleteHandler();
   }
 }
