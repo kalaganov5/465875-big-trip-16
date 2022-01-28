@@ -37,3 +37,5 @@ export const getRandomDescriptions = (array) => {
     .fill(randomDescription)
     .join(' ');
 };
+
+export const getRandomOffers = (offers) => (offers.length > 2 ? [getRandomItemArray(offers)] : []);

@@ -1,5 +1,5 @@
 import {ROUTE_TYPES, ROUTE_CITIES, ROUTES_INFO} from './const.js';
-import {getRandomInteger, getRandomItemArray} from './utils.js';
+import {getRandomInteger, getRandomItemArray, getRandomOffers} from './utils.js';
 import {ROUTE_POINT_OFFERS} from './const';
 import dayjs from 'dayjs';
 import {nanoid} from 'nanoid';
@@ -41,7 +41,7 @@ export const getRoutePoint = (type = getRandomItemArray(ROUTE_TYPES)) => {
       description: ROUTES_INFO[randomCity].description,
       photos: ROUTES_INFO[randomCity].photos,
     },
-    offers: ROUTE_POINT_OFFERS[type],
+    offers: getRandomOffers(ROUTE_POINT_OFFERS[type]),
     price: getRandomInteger(PRICE_OFFER_MIN, PRICE_OFFER_MAX),
     isFavorite: Boolean(getRandomInteger(0, 1)),
     timeStart: getRandomDateTime(0, DAY_GAP_MIN),
