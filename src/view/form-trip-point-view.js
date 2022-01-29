@@ -221,8 +221,9 @@ export default class FormTripPointView extends SmartView {
       offersElement.addEventListener('change', this.#formOffersPointHandler);
     }
 
-    this.element.querySelector('.event__input--price')
-      .addEventListener('input', this.#formCostHandler);
+    const inputPrice = this.element.querySelector('.event__input--price');
+    inputPrice.type = 'number';
+    inputPrice.addEventListener('input', this.#formCostHandler);
 
     this.#setDatepickerStart();
     this.#setDatepickerEnd();
