@@ -102,7 +102,7 @@ export default class TripPointPresenter {
   #formSubmitHandler = (tripPoint) => {
     this.#changeData(
       UserAction.UPDATE_ROUTE_POINT,
-      UpdateType.MINOR,
+      UpdateType.MAJOR,
       tripPoint,
     );
     this.#replaceFormToTripPoint();

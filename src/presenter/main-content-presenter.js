@@ -7,7 +7,7 @@ import CreatePointPresenter from './create-point-presenter.js';
 
 import {filter} from '../utils/filter.js';
 import {sortDurationDescending, sortPriceDescending, sortDayAscending, remove} from '../utils/common.js';
-import {RenderPosition, renderElement} from '../utils/render.js';
+import {RenderPosition, renderElement, replace} from '../utils/render.js';
 import {SortType, UserAction, UpdateType, FilterType} from '../const.js';
 
 export default class MainContentPresenter {
@@ -174,6 +174,10 @@ export default class MainContentPresenter {
   #createTripPoint = () => {
     this.#currentSortType = SortType.DEFAULT;
     this.#filterModel.setFilter(UpdateType.MAJOR, FilterType.EVERYTHING);
+    if (this.#tripPointEmptyComponent !== null) {
+      replace(this.#tripPointContainerComponent, this.#tripPointEmptyComponent);
+      this.#tripPointEmptyComponent = null;
+    }
     this.#tripPointNewPresenter.init();
   }
 
