@@ -329,6 +329,7 @@ export default class FormTripPointView extends SmartView {
         onChange: this.#formTimeStartHandler,
       },
     );
+
   }
 
   #formTimeStartHandler = ([userDateTimeStart]) => {
@@ -336,6 +337,8 @@ export default class FormTripPointView extends SmartView {
       {timeStart: userDateTimeStart,},
       true,
     );
+    this.#datepickerEnd.destroy();
+    this.#setDatepickerEnd();
   }
 
   #setDatepickerEnd = () => {
@@ -358,6 +361,8 @@ export default class FormTripPointView extends SmartView {
       {timeEnd: userDateTimeEnd,},
       true,
     );
+    this.#datepickerStart.destroy();
+    this.#setDatepickerStart();
   }
 
   setDeleteHandler = (callbackFunction) => {
