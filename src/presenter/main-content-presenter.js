@@ -27,22 +27,25 @@ export default class MainContentPresenter {
 
   #tripPointPresenter = new Map();
   #tripPointNewPresenter = null;
+
+  #addNewTripPointButton = null;
   /**
    * Creates an instance of MainContentPresenter.
    * @param {*} menuContainer
-   * @param {*} filterContainer
+   * @param {*} addNewTripPointButton
    * @param {*} contentContainer
    * @param {*} routePointsModel
    * @memberof MainContentPresenter
    */
-  constructor (menuContainer, filterContainer, contentContainer, routePointsModel, filterModel) {
+  constructor (menuContainer, addNewTripPointButton, contentContainer, routePointsModel, filterModel) {
     this.#menuContainer = menuContainer;
+    this.#addNewTripPointButton = addNewTripPointButton;
     this.#contentContainer = contentContainer;
 
     this.#routePointsModel = routePointsModel;
     this.#routePointsModel.addObserver(this.#handleModelEvent);
 
-    this.#tripPointNewPresenter = new CreatePointPresenter(this.#tripPointContainerComponent, this.#handleViewAction);
+    this.#tripPointNewPresenter = new CreatePointPresenter(this.#tripPointContainerComponent, this.#handleViewAction, this.#addNewTripPointButton);
 
     this.#filterModel = filterModel;
     this.#filterModel.addObserver(this.#handleModelEvent);
@@ -67,7 +70,7 @@ export default class MainContentPresenter {
       this.#renderMenu();
     }
 
-    this.#newEventButtonHandler();
+    this.#addTripPointButtonHandler();
 
     this.#renderTripPointContainer();
 
@@ -174,9 +177,8 @@ export default class MainContentPresenter {
     this.#tripPointNewPresenter.init();
   }
 
-  #newEventButtonHandler = () => {
-    const addNewTripPointButton = document.querySelector('.trip-main__event-add-btn');
-    addNewTripPointButton.addEventListener('click', (evt) => {
+  #addTripPointButtonHandler = () => {
+    this.#addNewTripPointButton.addEventListener('click', (evt) => {
       evt.preventDefault();
       this.#createTripPoint();
     });

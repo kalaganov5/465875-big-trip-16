@@ -17,15 +17,13 @@ routePointsModel.routePoints = tripPoints;
 // :START Контейнеры
 const menuContainer = document.querySelector('.trip-controls__navigation');
 const filterContainer = document.querySelector('.trip-controls__filters');
+const addNewTripPointButton = document.querySelector('.trip-main__event-add-btn');
 const sortAndContentContainer = document.querySelector('.trip-events');
 // :END Контейнеры
 
 const filterPresenter = new FilterTripPointPresenter(filterContainer, filterTripPointsModel, routePointsModel);
-const presenter = new MainContentPresenter(menuContainer, filterContainer, sortAndContentContainer, routePointsModel, filterTripPointsModel);
+const presenter = new MainContentPresenter(menuContainer, addNewTripPointButton, sortAndContentContainer, routePointsModel, filterTripPointsModel);
 presenter.init();
 filterPresenter.init();
 
-document.querySelector('.trip-main__event-add-btn').addEventListener('click', (evt) => {
-  evt.preventDefault();
-  presenter.createTripPoint();
-});
+
