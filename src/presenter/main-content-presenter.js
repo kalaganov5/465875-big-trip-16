@@ -67,6 +67,8 @@ export default class MainContentPresenter {
       this.#renderMenu();
     }
 
+    this.#newEventButtonHandler();
+
     this.#renderTripPointContainer();
 
     this.#renderTripPoints();
@@ -166,9 +168,17 @@ export default class MainContentPresenter {
     renderElement(this.#contentContainer, this.#tripPointEmptyComponent, RenderPosition.BEFOREEND);
   }
 
-  createTripPoint = () => {
+  #createTripPoint = () => {
     this.#currentSortType = SortType.DEFAULT;
     this.#filterModel.setFilter(UpdateType.MAJOR, FilterType.EVERYTHING);
     this.#tripPointNewPresenter.init();
+  }
+
+  #newEventButtonHandler = () => {
+    const addNewTripPointButton = document.querySelector('.trip-main__event-add-btn');
+    addNewTripPointButton.addEventListener('click', (evt) => {
+      evt.preventDefault();
+      this.#createTripPoint();
+    });
   }
 }
