@@ -3,12 +3,12 @@ import SortView from '../view/sort-view.js';
 import TripPointContainerView from '../view/trip-point-container-view.js';
 import TripPointEmptyView from '../view/trip-point-empty-view.js';
 import TripPointPresenter from './trip-point-presenter.js';
+import CreatePointPresenter from './create-point-presenter.js';
 
 import {filter} from '../utils/filter.js';
-
 import {sortDurationDescending, sortPriceDescending, sortDayAscending, remove} from '../utils/common.js';
 import {RenderPosition, renderElement} from '../utils/render.js';
-import {SortType, UserAction, UpdateType} from '../const.js';
+import {SortType, UserAction, UpdateType, FilterType} from '../const.js';
 
 export default class MainContentPresenter {
   #menuContainer = null;
@@ -26,6 +26,7 @@ export default class MainContentPresenter {
   #tripPointContainerComponent = new TripPointContainerView();
 
   #tripPointPresenter = new Map();
+  #tripPointNewPresenter = null;
   /**
    * Creates an instance of MainContentPresenter.
    * @param {*} menuContainer
@@ -40,6 +41,8 @@ export default class MainContentPresenter {
 
     this.#routePointsModel = routePointsModel;
     this.#routePointsModel.addObserver(this.#handleModelEvent);
+
+    this.#tripPointNewPresenter = new CreatePointPresenter(this.#tripPointContainerComponent, this.#handleViewAction);
 
     this.#filterModel = filterModel;
     this.#filterModel.addObserver(this.#handleModelEvent);
@@ -100,6 +103,7 @@ export default class MainContentPresenter {
 
 
   #handleModeChange = () => {
+    this.#tripPointNewPresenter.destroy();
     this.#tripPointPresenter.forEach((presenter) => presenter.resetView());
   }
 
@@ -143,6 +147,7 @@ export default class MainContentPresenter {
   }
 
   #clearContent = () => {
+    this.#tripPointNewPresenter.destroy();
     remove(this.#sortComponent);
     if (this.#tripPointEmptyComponent) {
       remove(this.#tripPointEmptyComponent);
@@ -159,5 +164,11 @@ export default class MainContentPresenter {
   #renderNoTripPoint = () => {
     this.#tripPointEmptyComponent = new TripPointEmptyView(this.#filterType);
     renderElement(this.#contentContainer, this.#tripPointEmptyComponent, RenderPosition.BEFOREEND);
+  }
+
+  createTripPoint = () => {
+    this.#currentSortType = SortType.DEFAULT;
+    this.#filterModel.setFilter(UpdateType.MAJOR, FilterType.EVERYTHING);
+    this.#tripPointNewPresenter.init();
   }
 }

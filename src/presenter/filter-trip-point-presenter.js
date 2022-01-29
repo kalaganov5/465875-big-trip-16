@@ -1,5 +1,6 @@
 import FilterView from '../view/filters-view.js';
-import {renderElement, RenderPosition} from '../utils/render.js';
+import {renderElement, RenderPosition, replace} from '../utils/render.js';
+import {remove} from '../utils/common.js';
 import {UpdateType} from '../const.js';
 
 export default class FilterTripPointPresenter {
@@ -23,9 +24,17 @@ export default class FilterTripPointPresenter {
   }
 
   init () {
+    const prevFilterComponent = this.#filterComponent;
     this.#filterComponent = new FilterView(this.#filterModel.filterType);
     this.#filterComponent.setFilterHandler(this.#filterHandler);
-    this.#renderFilter();
+
+    if (prevFilterComponent === null) {
+      this.#renderFilter();
+      return;
+    }
+
+    replace(this.#filterComponent, prevFilterComponent);
+    remove(prevFilterComponent);
   }
 
 
@@ -38,7 +47,6 @@ export default class FilterTripPointPresenter {
   }
 
   #handleModelEvent = () => {
-    console.log('Обновить доску');
-    console.log(this.#tripPointsModel.routePoints)
+    this.init();
   }
 }

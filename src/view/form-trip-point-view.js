@@ -3,6 +3,8 @@ import {humanReadableDate, setIconUrl, generateSelectCities, firstLetterToUpperC
 import {ROUTE_POINT_OFFERS, ROUTES_INFO} from '../mock/const.js';
 import SmartView from './smart-view.js';
 import flatpickr from 'flatpickr';
+import dayjs from 'dayjs';
+import {nanoid} from 'nanoid';
 
 import '../../node_modules/flatpickr/dist/flatpickr.min.css';
 
@@ -163,9 +165,15 @@ export default class FormTripPointView extends SmartView {
    * @param {object} isCreateRoutePointEvent true если это создание новой точки маршрута или false если это редактирование точки маршрута
    * @memberof FormTripPointView
    */
-  constructor(tripPoint, isCreateRoutePointEvent = false) {
+  constructor(tripPoint) {
     super();
-    this._data = FormTripPointView.parseTripPointToData(tripPoint, isCreateRoutePointEvent);
+    let tripPointData = tripPoint;
+    let isCreateRoutePointEvent = false;
+    if (tripPointData === undefined) {
+      tripPointData = this.#tripPointBlank;
+      isCreateRoutePointEvent = true;
+    }
+    this._data = FormTripPointView.parseTripPointToData(tripPointData, isCreateRoutePointEvent);
     this.#setInnerHandlers();
   }
 
@@ -229,8 +237,12 @@ export default class FormTripPointView extends SmartView {
   restoreHandlers = () => {
     this.#setInnerHandlers();
     this.setFormSubmitHandler(this._callback.formSubmitHandler);
-    this.setFormCloseHandler(this._callback.formCloseHandler);
-    this.setDeleteHandler(this._callback.formDeleteHandler);
+    if (this._data.isCreateTripPoint) {
+      this.setDeleteHandler(this._callback.formDeleteHandler);
+    } else {
+      this.setFormCloseHandler(this._callback.formCloseHandler);
+    }
+
   }
 
   setFormCloseHandler = (callbackFunction) => {
@@ -357,4 +369,19 @@ export default class FormTripPointView extends SmartView {
     evt.preventDefault();
     this._callback.formDeleteHandler();
   }
+
+  #tripPointBlank = {
+    id: nanoid(),
+    destination: '',
+    type: 'taxi',
+    info: {
+      description: '',
+      photos: [],
+    },
+    offers: [],
+    price: '',
+    isFavorite: false,
+    timeStart: dayjs().toDate(),
+    timeEnd: dayjs().toDate(),
+  };
 }

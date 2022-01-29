@@ -24,3 +24,8 @@ const filterPresenter = new FilterTripPointPresenter(filterContainer, filterTrip
 const presenter = new MainContentPresenter(menuContainer, filterContainer, sortAndContentContainer, routePointsModel, filterTripPointsModel);
 presenter.init();
 filterPresenter.init();
+
+document.querySelector('.trip-main__event-add-btn').addEventListener('click', (evt) => {
+  evt.preventDefault();
+  presenter.createTripPoint();
+});

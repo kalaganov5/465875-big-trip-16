@@ -30,7 +30,6 @@ export default class TripPointPresenter {
 
   init = (tripPointItem) => {
     this.#tripPointData = tripPointItem;
-
     const prevTripPointComponent = this.#tripPointComponent;
     const prevTripPointFormComponent = this.#tripPointFormComponent;
 
