@@ -280,23 +280,34 @@ export default class FormTripPointView extends SmartView {
   #formDestinationPointHandler = (evt) => {
     evt.preventDefault();
     const newDestination = checkItemInArray(ROUTE_CITIES, evt.target.value);
-    this.updateData(
-      {
-        destination: newDestination,
-        info: {
-          description: ROUTES_INFO[newDestination].description,
-          photos: ROUTES_INFO[newDestination].photos
+    if (newDestination === '') {
+      evt.target.setCustomValidity('Select from the list');
+    } else {
+      evt.target.setCustomValidity('');
+      this.updateData(
+        {
+          destination: newDestination,
+          info: {
+            description: ROUTES_INFO[newDestination].description,
+            photos: ROUTES_INFO[newDestination].photos
+          }
         }
-      }
-    );
+      );
+    }
   }
 
   #formCostHandler = (evt) => {
     evt.preventDefault();
-    this.updateData(
-      {price: evt.target.value,},
-      true,
-    );
+    const newPrice = Number(evt.target.value);
+    if (newPrice < 1) {
+      evt.target.setCustomValidity('Price must be greater than 0');
+    } else {
+      evt.target.setCustomValidity('');
+      this.updateData(
+        {price: evt.target.value,},
+        true,
+      );
+    }
   }
 
   #formOffersPointHandler = (evt) => {
@@ -377,14 +388,14 @@ export default class FormTripPointView extends SmartView {
 
   #tripPointBlank = {
     id: nanoid(),
-    destination: '',
+    destination: 'Amsterdam',
     type: 'taxi',
     info: {
       description: '',
       photos: [],
     },
     offers: [],
-    price: '',
+    price: 0,
     isFavorite: false,
     timeStart: dayjs().toDate(),
     timeEnd: dayjs().toDate(),
