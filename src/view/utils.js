@@ -75,3 +75,15 @@ export const firstLetterToUpperCase = (string) => (string[0].toUpperCase() + str
  * @returns если значение существует вернёт его
  */
 export const checkItemInArray = (elements, value) => (elements.includes(value) ? value : '');
+
+export const makeItemsUnique = (items) => [...new Set(items)];
+
+export const costByType = (items, type) => {
+  let cost = 0;
+  items.forEach((item) => {
+    if (item.type === type) {
+      cost = cost + Number(item.price);
+    }
+  });
+  return cost;
+};
