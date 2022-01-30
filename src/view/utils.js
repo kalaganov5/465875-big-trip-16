@@ -87,3 +87,35 @@ export const costByType = (items, type) => {
   });
   return cost;
 };
+
+export const countTripPointsByType = (items, type) => (items.filter((task) => task.type === type).length);
+
+export const timeByType = (tripPoints, type) => {
+  let durationMinutesByType = 0;
+
+  tripPoints.forEach((tripPoint) => {
+    if (tripPoint.type === type) {
+      const dateStart = tripPoint.timeStart;
+      const dateEnd = tripPoint.timeEnd;
+      const durationMinutes = dayjs(dateEnd).diff(dateStart, 'minute');
+      durationMinutesByType = durationMinutesByType + durationMinutes;
+    }
+  });
+
+  return durationMinutesByType;
+};
+
+export const minutesToHumanFormat = (minutes) => {
+  const DAY_OF_MINUTES = 1440;
+  const HOUR_OF_MINUTES = 60;
+  const day = Math.trunc(minutes / DAY_OF_MINUTES);
+  const hour = Math.trunc(
+    (minutes % DAY_OF_MINUTES) / HOUR_OF_MINUTES
+  );
+  const minute = (minutes % DAY_OF_MINUTES) % HOUR_OF_MINUTES;
+  return {
+    day: createLeadingZero(day),
+    hour: createLeadingZero(hour),
+    minute: createLeadingZero(minute),
+  };
+};
