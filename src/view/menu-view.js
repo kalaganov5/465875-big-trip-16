@@ -9,7 +9,6 @@ const createMenuTemplate = () => (
 );
 
 export default class MenuView extends AbstractView {
-  // #currentMenuItem = MenuItem.TRIP_POINTS;
   #menuActiveClass = 'trip-tabs__btn--active';
   constructor () {
     super();
@@ -22,20 +21,26 @@ export default class MenuView extends AbstractView {
 
   setMenuClickHandler = (callbackFunction) => {
     this._callback.menuClickHandler = callbackFunction;
-    this.element.querySelectorAll('.trip-tabs__btn').forEach((menuItem) => {
-      menuItem.addEventListener('click', this.#menuClickHandler);
-    });
+    this.element
+      .querySelectorAll('.trip-tabs__btn')
+      .forEach((menuItem) => {
+        menuItem.addEventListener('click', this.#menuClickHandler);
+      });
   }
 
   #menuClickHandler = (evt) => {
     evt.preventDefault();
-    const currentActiveItem = this.element.querySelector(`.${this.#menuActiveClass}`);
-    currentActiveItem.classList.remove(this.#menuActiveClass);
-    currentActiveItem.href = '#';
-
-    evt.target.removeAttribute('href');
-    evt.target.classList.add(this.#menuActiveClass);
-
+    this.toggleMenu(evt.target.dataset.menuItem);
     this._callback.menuClickHandler(evt.target.dataset.menuItem);
+  }
+
+  toggleMenu = (newMenuItemType) => {
+    const currentMenuItem = this.element.querySelector(`.${this.#menuActiveClass}`);
+    currentMenuItem.classList.remove(this.#menuActiveClass);
+    currentMenuItem.href = '#';
+
+    const newMenuItem = this.element.querySelector(`[data-menu-item="${newMenuItemType}"]`);
+    newMenuItem.removeAttribute('href');
+    newMenuItem.classList.add(this.#menuActiveClass);
   }
 }
