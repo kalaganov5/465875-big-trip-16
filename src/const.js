@@ -21,3 +21,8 @@ export const FilterType = {
   FUTURE: 'FUTURE',
   PAST: 'PAST',
 };
+
+export const MenuItem = {
+  TRIP_POINTS: 'TRIP_POINTS',
+  STATISTICS: 'STATISTICS',
+};

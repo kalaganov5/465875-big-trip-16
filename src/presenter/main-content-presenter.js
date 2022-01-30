@@ -8,7 +8,7 @@ import CreatePointPresenter from './create-point-presenter.js';
 import {filter} from '../utils/filter.js';
 import {sortDurationDescending, sortPriceDescending, sortDayAscending, remove} from '../utils/common.js';
 import {RenderPosition, renderElement, replace} from '../utils/render.js';
-import {SortType, UserAction, UpdateType, FilterType} from '../const.js';
+import {SortType, UserAction, UpdateType, FilterType, MenuItem} from '../const.js';
 
 export default class MainContentPresenter {
   #menuContainer = null;
@@ -67,6 +67,7 @@ export default class MainContentPresenter {
   init = () => {
     if (this.#menuComponent === null) {
       this.#menuComponent = new MenuView();
+      this.#menuComponent.setMenuClickHandler(this.#menuClickHandler);
       this.#renderMenu();
     }
 
@@ -110,6 +111,10 @@ export default class MainContentPresenter {
   #handleModeChange = () => {
     this.#tripPointNewPresenter.destroy();
     this.#tripPointPresenter.forEach((presenter) => presenter.resetView());
+  }
+
+  #menuClickHandler = (currentMenuItem) => {
+    console.log(currentMenuItem);
   }
 
   #renderMenu = () => {
