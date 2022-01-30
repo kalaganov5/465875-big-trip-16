@@ -3,6 +3,8 @@ import {humanReadableDate, setIconUrl, generateSelectCities, firstLetterToUpperC
 import {ROUTE_POINT_OFFERS, ROUTES_INFO} from '../mock/const.js';
 import SmartView from './smart-view.js';
 import flatpickr from 'flatpickr';
+import dayjs from 'dayjs';
+import {nanoid} from 'nanoid';
 
 import '../../node_modules/flatpickr/dist/flatpickr.min.css';
 
@@ -31,25 +33,27 @@ const generateSelectEventType = (currentType) => {
  * @param {Array} offers массив объектов с опциями для точки маршрута
  * @returns разметка с предложениями для поездки или ничего
  */
-const setOffersCreatePoint = (offers) => {
+const setOffersCreatePoint = (offers, offersSelected) => {
   if (offers.length === 0) {
     return '';
   }
 
-  const offerMarkup = Array.from({length: offers.length}, (_, index) => (
-    `<div class="event__offer-selector">
+  const offerMarkup = Array.from({length: offers.length}, (_, index) => {
+    const isSelected = offersSelected.some((offer) => (offer.id === offers[index].id));
+    return `<div class="event__offer-selector">
       <input class="event__offer-checkbox  visually-hidden"
         id="event-offers[index]-${index}"
         type="checkbox"
         name="event-offers[index]-${offers[index].title.toLowerCase().replaceAll(' ', '-')}"
-        ${offers[index].isSelect ? 'checked' : ''}>
+        data-offer-id="${offers[index].id}"
+        ${isSelected ? 'checked' : ''}>
       <label class="event__offer-label" for="event-offers[index]-${index}">
         <span class="event__offer-title">${offers[index].title}</span>
         &plus;&euro;&nbsp;
         <span class="event__offer-price">${offers[index].price}</span>
       </label>
-    </div>`)
-  );
+    </div>`;
+  });
 
   return `
   <section class="event__section  event__section--offers">
@@ -68,6 +72,9 @@ const setOffersCreatePoint = (offers) => {
  * @returns
  */
 const setInfo = (description, images) => {
+  if (description === '' && images.length === 0) {
+    return '';
+  }
   const imageLayout = [];
   for (const image of images) {
     imageLayout.push(`<img class="event__photo" src="${image}" alt="Event photo"></img>`);
@@ -93,7 +100,7 @@ const setInfo = (description, images) => {
  */
 const createFormPointTemplate = (routePoint) => {
   const {timeStart, timeEnd, type, destination, price, offers, info, isCreateTripPoint} = routePoint;
-
+  const offersCurrentType = ROUTE_POINT_OFFERS[type];
   return `<li class="trip-events__item">
     <form class="event event--edit" action="#" method="post">
       <header class="event__header">
@@ -134,8 +141,8 @@ const createFormPointTemplate = (routePoint) => {
         <button class="event__reset-btn" type="reset">${isCreateTripPoint ? 'Cancel' : 'Delete'}</button>
         ${isCreateTripPoint ? '' : '<button class="event__rollup-btn" type="button"><span class="visually-hidden">Open event</span></button>'}
       </header>
-      ${offers.length > 0 || Object.keys(info).length > 0 ?`<section class="event__details">
-        ${setOffersCreatePoint(offers)}
+      ${offersCurrentType.length > 0 || Object.keys(info).length > 0 ?`<section class="event__details">
+        ${setOffersCreatePoint(offersCurrentType, offers)}
         ${setInfo(info.description, info.photos)}
       </section>`: ''}
     </form>
@@ -158,9 +165,15 @@ export default class FormTripPointView extends SmartView {
    * @param {object} isCreateRoutePointEvent true если это создание новой точки маршрута или false если это редактирование точки маршрута
    * @memberof FormTripPointView
    */
-  constructor(tripPoint, isCreateRoutePointEvent = false) {
+  constructor(tripPoint) {
     super();
-    this._data = FormTripPointView.parseTripPointToData(tripPoint, isCreateRoutePointEvent);
+    let tripPointData = tripPoint;
+    let isCreateRoutePointEvent = false;
+    if (tripPointData === undefined) {
+      tripPointData = this.#tripPointBlank;
+      isCreateRoutePointEvent = true;
+    }
+    this._data = FormTripPointView.parseTripPointToData(tripPointData, isCreateRoutePointEvent);
     this.#setInnerHandlers();
   }
 
@@ -202,8 +215,15 @@ export default class FormTripPointView extends SmartView {
       .addEventListener('change', this.#formTypePointHandler);
     this.element.querySelector('.event__input--destination')
       .addEventListener('change', this.#formDestinationPointHandler);
-    this.element.querySelector('.event__input--price')
-      .addEventListener('input', this.#formCostHandler);
+
+    const offersElement = this.element.querySelector('.event__available-offers');
+    if (offersElement) {
+      offersElement.addEventListener('change', this.#formOffersPointHandler);
+    }
+
+    const inputPrice = this.element.querySelector('.event__input--price');
+    inputPrice.type = 'number';
+    inputPrice.addEventListener('input', this.#formCostHandler);
 
     this.#setDatepickerStart();
     this.#setDatepickerEnd();
@@ -218,7 +238,12 @@ export default class FormTripPointView extends SmartView {
   restoreHandlers = () => {
     this.#setInnerHandlers();
     this.setFormSubmitHandler(this._callback.formSubmitHandler);
-    this.setFormCloseHandler(this._callback.formCloseHandler);
+    if (this._data.isCreateTripPoint) {
+      this.setDeleteHandler(this._callback.formDeleteHandler);
+    } else {
+      this.setFormCloseHandler(this._callback.formCloseHandler);
+    }
+
   }
 
   setFormCloseHandler = (callbackFunction) => {
@@ -248,7 +273,7 @@ export default class FormTripPointView extends SmartView {
     this.updateData(
       {
         type: newType,
-        offers: ROUTE_POINT_OFFERS[newType],
+        offers: [],
       }
     );
   }
@@ -256,21 +281,49 @@ export default class FormTripPointView extends SmartView {
   #formDestinationPointHandler = (evt) => {
     evt.preventDefault();
     const newDestination = checkItemInArray(ROUTE_CITIES, evt.target.value);
-    this.updateData(
-      {
-        destination: newDestination,
-        info: {
-          description: ROUTES_INFO[newDestination].description,
-          photos: ROUTES_INFO[newDestination].photos
+    if (newDestination === '') {
+      evt.target.setCustomValidity('Select from the list');
+    } else {
+      evt.target.setCustomValidity('');
+      this.updateData(
+        {
+          destination: newDestination,
+          info: {
+            description: ROUTES_INFO[newDestination].description,
+            photos: ROUTES_INFO[newDestination].photos
+          }
         }
-      }
-    );
+      );
+    }
   }
 
   #formCostHandler = (evt) => {
     evt.preventDefault();
+    const newPrice = Number(evt.target.value);
+    if (newPrice < 1) {
+      evt.target.setCustomValidity('Price must be greater than 0');
+    } else {
+      evt.target.setCustomValidity('');
+      this.updateData(
+        {price: evt.target.value,},
+        true,
+      );
+    }
+  }
+
+  #formOffersPointHandler = (evt) => {
+    evt.preventDefault();
+    let pointOffers = [...this._data.offers];
+    const changedOfferId = evt.target.dataset.offerId;
+    const changedOffer = ROUTE_POINT_OFFERS[this._data.type].find((offer) => (offer.id === changedOfferId));
+
+    if (evt.target.checked) {
+      pointOffers.push(changedOffer);
+    } else {
+      pointOffers = pointOffers.filter((offer) => (offer.id !== changedOfferId));
+    }
     this.updateData(
-      {price: evt.target.value,},
+      {offers: [...pointOffers]},
       true,
     );
   }
@@ -288,6 +341,7 @@ export default class FormTripPointView extends SmartView {
         onChange: this.#formTimeStartHandler,
       },
     );
+
   }
 
   #formTimeStartHandler = ([userDateTimeStart]) => {
@@ -295,6 +349,8 @@ export default class FormTripPointView extends SmartView {
       {timeStart: userDateTimeStart,},
       true,
     );
+    this.#datepickerEnd.destroy();
+    this.#setDatepickerEnd();
   }
 
   #setDatepickerEnd = () => {
@@ -317,5 +373,32 @@ export default class FormTripPointView extends SmartView {
       {timeEnd: userDateTimeEnd,},
       true,
     );
+    this.#datepickerStart.destroy();
+    this.#setDatepickerStart();
   }
+
+  setDeleteHandler = (callbackFunction) => {
+    this._callback.formDeleteHandler = callbackFunction;
+    this.element.querySelector('.event__reset-btn').addEventListener('click', this.#deleteHandler);
+  }
+
+  #deleteHandler = (evt) => {
+    evt.preventDefault();
+    this._callback.formDeleteHandler();
+  }
+
+  #tripPointBlank = {
+    id: nanoid(),
+    destination: 'Amsterdam',
+    type: 'taxi',
+    info: {
+      description: '',
+      photos: [],
+    },
+    offers: [],
+    price: 0,
+    isFavorite: false,
+    timeStart: dayjs().toDate(),
+    timeEnd: dayjs().toDate(),
+  };
 }

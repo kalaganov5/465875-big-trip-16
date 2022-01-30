@@ -4,6 +4,7 @@ import FormTripPointView from '../view/form-trip-point-view.js';
 import {renderElement, replace, RenderPosition} from '../utils/render.js';
 import {remove} from '../utils/common.js';
 import {Mode} from './const.js';
+import {UserAction, UpdateType} from '../const.js';
 
 export default class TripPointPresenter {
   #tripPointData = null;
@@ -29,7 +30,6 @@ export default class TripPointPresenter {
 
   init = (tripPointItem) => {
     this.#tripPointData = tripPointItem;
-
     const prevTripPointComponent = this.#tripPointComponent;
     const prevTripPointFormComponent = this.#tripPointFormComponent;
 
@@ -38,8 +38,9 @@ export default class TripPointPresenter {
     this.#tripPointComponent.setToggleFavoritePointHandler(this.#toggleFavoritePoint);
 
     this.#tripPointFormComponent = new FormTripPointView(this.#tripPointData);
-    this.#tripPointFormComponent.setFormCloseHandler(this.#replaceFormToTripPoint);
-    this.#tripPointFormComponent.setFormSubmitHandler(this.#replaceFormToTripPoint);
+    this.#tripPointFormComponent.setFormCloseHandler(this.#formCloseHandler);
+    this.#tripPointFormComponent.setFormSubmitHandler(this.#formSubmitHandler);
+    this.#tripPointFormComponent.setDeleteHandler(this.#formDeleteHandler);
 
     if (prevTripPointComponent === null || prevTripPointFormComponent === null) {
       renderElement(this.#tripPointContainer, this.#tripPointComponent, RenderPosition.BEFOREEND);
@@ -91,6 +92,31 @@ export default class TripPointPresenter {
   }
 
   #toggleFavoritePoint = () => {
-    this.#changeData({...this.#tripPointData, isFavorite: !this.#tripPointData.isFavorite});
+    this.#changeData(
+      UserAction.UPDATE_ROUTE_POINT,
+      UpdateType.MINOR,
+      {...this.#tripPointData, isFavorite: !this.#tripPointData.isFavorite}
+    );
+  }
+
+  #formSubmitHandler = (tripPoint) => {
+    this.#changeData(
+      UserAction.UPDATE_ROUTE_POINT,
+      UpdateType.MAJOR,
+      tripPoint,
+    );
+    this.#replaceFormToTripPoint();
+  }
+
+  #formCloseHandler = () => {
+    this.resetView();
+  }
+
+  #formDeleteHandler = () => {
+    this.#changeData(
+      UserAction.DELETE_ROUTE_POINT,
+      UpdateType.MAJOR,
+      this.#tripPointData,
+    );
   }
 }
