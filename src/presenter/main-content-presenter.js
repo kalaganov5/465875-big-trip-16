@@ -2,6 +2,7 @@ import MenuView from '../view/menu-view.js';
 import SortView from '../view/sort-view.js';
 import TripPointContainerView from '../view/trip-point-container-view.js';
 import TripPointEmptyView from '../view/trip-point-empty-view.js';
+import StatisticsView from '../view/statistics-view.js';
 import TripPointPresenter from './trip-point-presenter.js';
 import CreatePointPresenter from './create-point-presenter.js';
 
@@ -25,6 +26,8 @@ export default class MainContentPresenter {
   #sortComponent = null;
   #tripPointEmptyComponent = null;
   #tripPointContainerComponent = new TripPointContainerView();
+
+  #statisticsComponent = null;
 
   #tripPointPresenter = new Map();
   #tripPointNewPresenter = null;
@@ -72,6 +75,10 @@ export default class MainContentPresenter {
       this.#menuComponent = new MenuView();
       this.#menuComponent.setMenuClickHandler(this.#menuClickHandler);
       this.#renderMenu();
+    }
+
+    if (this.#statisticsComponent !== null) {
+      remove(this.#statisticsComponent);
     }
 
     this.#filterModel.addObserver(this.#handleModelEvent);
@@ -139,6 +146,8 @@ export default class MainContentPresenter {
         this.#clearContent();
 
         // Показать статистику
+        this.#statisticsComponent = new StatisticsView(this.routePoints);
+        renderElement(this.#contentContainer, this.#statisticsComponent, RenderPosition.AFTEREND);
         break;
     }
   }
