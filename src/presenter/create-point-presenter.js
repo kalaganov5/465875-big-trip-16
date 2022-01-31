@@ -1,7 +1,6 @@
 import {renderElement, RenderPosition} from '../utils/render.js';
 import {UserAction, UpdateType} from '../const.js';
 import FormTripPointView from '../view/form-trip-point-view.js';
-import {nanoid} from 'nanoid';
 import {remove} from '../utils/common.js';
 
 export default class CreatePointPresenter {
@@ -44,9 +43,7 @@ export default class CreatePointPresenter {
     this.#changeData(
       UserAction.ADD_ROUTE_POINT,
       UpdateType.MAJOR,
-      // Пока у нас нет сервера, который бы после сохранения
-      // выдавал честный id задачи, нам нужно позаботиться об этом самим
-      {id: nanoid(), ...tripPoint},
+      tripPoint,
     );
     this.destroy();
   }

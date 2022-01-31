@@ -1,6 +1,8 @@
 const Method = {
   GET: 'GET',
   PUT: 'PUT',
+  POST: 'POST',
+  DELETE: 'DELETE',
 };
 
 export default class ApiService {
@@ -16,6 +18,14 @@ export default class ApiService {
     return this.#load({url: 'points'}).then(ApiService.parseResponse);
   }
 
+  get destinations() {
+    return this.#load({url: 'destinations'}).then(ApiService.parseResponse);
+  }
+
+  get offers() {
+    return this.#load({url: 'offers'}).then(ApiService.parseResponse);
+  }
+
   updateTripPoint = async (tripPoint) => {
     const response = await this.#load({
       url: `points/${tripPoint.id}`,
@@ -27,6 +37,28 @@ export default class ApiService {
     const parsedResponse = await ApiService.parseResponse(response);
 
     return parsedResponse;
+  }
+
+  addTripPoint = async (tripPoint) => {
+    const response = await this.#load({
+      url: 'points',
+      method: Method.POST,
+      body: JSON.stringify(this.#adaptToServer(tripPoint)),
+      headers: new Headers({'Content-Type': 'application/json'}),
+    });
+
+    const parsedResponse = await ApiService.parseResponse(response);
+
+    return parsedResponse;
+  }
+
+  deleteTripPoint = async (tripPoint) => {
+    const response = await this.#load({
+      url: `points/${tripPoint.id}`,
+      method: Method.DELETE,
+    });
+
+    return response;
   }
 
   #load = async ({url, method = Method.GET, body = null, headers = new Headers()}) => {

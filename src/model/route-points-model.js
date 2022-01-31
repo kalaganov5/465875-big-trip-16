@@ -48,28 +48,34 @@ export default class RoutePointsModel extends AbstractObservable {
     }
   }
 
-  addRoutePoint = (updateType, update) => {
-    this.#routePoints = [
-      update,
-      ...this.#routePoints,
-    ];
-
-    this._notify(updateType, update);
+  addRoutePoint = async (updateType, update) => {
+    try {
+      const response = await this.#apiService.addTripPoint(update);
+      const newTripPoint = this.#adaptToClient(response);
+      this.#routePoints = [newTripPoint, ...this.#routePoints];
+      this._notify(updateType, newTripPoint);
+    } catch(err) {
+      throw new Error('Can\'t add route point');
+    }
   }
 
-  deleteRoutePoint = (updateType, update) => {
+  deleteRoutePoint = async (updateType, update) => {
     const index = this.#routePoints.findIndex((routePoint) => (routePoint.id === update.id));
 
     if (index === -1) {
       throw new Error('Can\'t delete unexisting routePoint');
     }
 
-    this.#routePoints = [
-      ...this.#routePoints.slice(0, index),
-      ...this.routePoints.slice(index + 1),
-    ];
-
-    this._notify(updateType);
+    try {
+      await this.#apiService.deleteTripPoint(update);
+      this.#routePoints = [
+        ...this.#routePoints.slice(0, index),
+        ...this.routePoints.slice(index + 1),
+      ];
+      this._notify(updateType);
+    } catch(err) {
+      throw new Error('Can\'t delete trip point');
+    }
   }
 
   #adaptToClient = (tripPoints) => {
