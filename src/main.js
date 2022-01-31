@@ -4,19 +4,11 @@ import FilterTripPointsModel from './model/filter-trip-point-model.js';
 import FilterTripPointPresenter from './presenter/filter-trip-point-presenter.js';
 import ApiService from './api-service.js';
 
-import {getRoutePoint} from './mock/get-route-point.js';
-
 const AUTHORIZATION = 'Basic MslIuwHRNfp2FapAPI';
 const END_POINT = 'https://16.ecmascript.pages.academy/big-trip';
 
-// mock
-const TRIP_POINT_COUNT = 20;
-const tripPoints = Array.from({length: TRIP_POINT_COUNT}, getRoutePoint);
-// mock
-
 const filterTripPointsModel = new FilterTripPointsModel();
 const routePointsModel = new RoutePointsModel(new ApiService(END_POINT, AUTHORIZATION));
-routePointsModel.routePoints = tripPoints;
 
 // :START Контейнеры
 const menuContainer = document.querySelector('.trip-controls__navigation');
