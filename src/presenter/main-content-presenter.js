@@ -75,7 +75,7 @@ export default class MainContentPresenter {
   }
 
   init = () => {
-    if (this.#menuComponent === null) {
+    if (this.#menuComponent === null && this.#isLoading === LoadStatus.LOADED) {
       this.#menuComponent = new MenuView();
       this.#menuComponent.setMenuClickHandler(this.#menuClickHandler);
       this.#renderMenu();
@@ -86,7 +86,9 @@ export default class MainContentPresenter {
     }
 
     this.#filterModel.addObserver(this.#handleModelEvent);
-    this.#filterPresenter.init();
+    if (this.#isLoading === LoadStatus.LOADED) {
+      this.#filterPresenter.init();
+    }
 
     this.#tripPointContainerComponent = new TripPointContainerView();
     this.#renderTripPointContainer();
@@ -253,16 +255,13 @@ export default class MainContentPresenter {
   #disablingControlWhileLoadingToggle = (status = LoadStatus.LOADING) => {
     switch (status) {
       case(LoadStatus.LOADING):
-        this.#menuComponent.disableControlToggle(status);
-        console.log(status);
+        this.#addNewTripPointButton.disabled = true;
         this.#renderLoading();
         break;
       case(LoadStatus.LOADED):
-        this.#menuComponent.disableControlToggle(status);
+        this.#addNewTripPointButton.disabled = false;
         remove(this.#loadingComponent);
         this.#isLoading = LoadStatus.LOADED;
-
-        console.log(status);
         break;
     }
   }

@@ -1,5 +1,5 @@
 import AbstractView from './abstract-view.js';
-import {MenuItem, LoadStatus} from '../const.js';
+import {MenuItem} from '../const.js';
 
 const createMenuTemplate = () => (
   `<nav class="trip-controls__trip-tabs  trip-tabs">
@@ -42,29 +42,5 @@ export default class MenuView extends AbstractView {
     const newMenuItem = this.element.querySelector(`[data-menu-item="${newMenuItemType}"]`);
     newMenuItem.removeAttribute('href');
     newMenuItem.classList.add(this.#menuActiveClass);
-  }
-
-  disableControlToggle = (statusControl) => {
-    console.log(statusControl)
-    switch (statusControl) {
-      case(LoadStatus.LOADING):
-        console.log(statusControl);
-        this.element
-          .querySelectorAll('.trip-tabs__btn')
-          .forEach((menuItem) => {
-            menuItem.classList.add('trip-tabs__btn--disabled');
-            menuItem.removeAttribute('href');
-          });
-        break;
-      case(LoadStatus.LOADED):
-        console.log(statusControl);
-        this.element
-          .querySelectorAll('.trip-tabs__btn')
-          .forEach((menuItem) => {
-            menuItem.classList.remove('trip-tabs__btn--disabled');
-            menuItem.href = '#';
-          });
-        break;
-    }
   }
 }
