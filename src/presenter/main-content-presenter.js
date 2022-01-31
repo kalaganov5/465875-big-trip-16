@@ -10,7 +10,7 @@ import LoadingView from '../view/loading-view.js';
 import {filter} from '../utils/filter.js';
 import {sortDurationDescending, sortPriceDescending, sortDayAscending, remove} from '../utils/common.js';
 import {RenderPosition, renderElement, replace} from '../utils/render.js';
-import {SortType, UserAction, UpdateType, FilterType, MenuItem} from '../const.js';
+import {SortType, UserAction, UpdateType, FilterType, MenuItem, LoadStatus} from '../const.js';
 
 export default class MainContentPresenter {
   #menuContainer = null;
@@ -35,7 +35,7 @@ export default class MainContentPresenter {
   #filterPresenter = null;
 
   #addNewTripPointButton = null;
-  #isLoading = true;
+  #isLoading = LoadStatus.LOADING;
   /**
    * Creates an instance of MainContentPresenter.
    * @param {*} menuContainer
@@ -52,6 +52,7 @@ export default class MainContentPresenter {
     this.#routePointsModel = routePointsModel;
     this.#routePointsModel.addObserver(this.#handleModelEvent);
     this.#routePointsModel.init();
+    this.#disablingControlWhileLoadingToggle(this.#isLoading);
 
     this.#filterModel = filterModel;
 
@@ -93,9 +94,6 @@ export default class MainContentPresenter {
 
     this.#tripPointNewPresenter = new CreatePointPresenter(this.#tripPointContainerComponent, this.#handleViewAction, this.#addNewTripPointButton);
 
-    if (this.#isLoading) {
-      this.#renderLoading();
-    }
   }
 
   #handleViewAction = (actionType, updateType, update) => {
@@ -125,8 +123,7 @@ export default class MainContentPresenter {
         this.init();
         break;
       case UpdateType.INIT:
-        this.#isLoading = false;
-        remove(this.#loadingComponent);
+        this.#disablingControlWhileLoadingToggle(LoadStatus.LOADED);
         this.init();
         break;
     }
@@ -219,7 +216,7 @@ export default class MainContentPresenter {
   }
 
   #renderNoTripPoint = () => {
-    if (this.#isLoading) {
+    if (this.#isLoading === LoadStatus.LOADING) {
       return;
     }
     remove(this.#loadingComponent);
@@ -251,5 +248,22 @@ export default class MainContentPresenter {
       }
       this.#createTripPoint();
     });
+  }
+
+  #disablingControlWhileLoadingToggle = (status = LoadStatus.LOADING) => {
+    switch (status) {
+      case(LoadStatus.LOADING):
+        this.#menuComponent.disableControlToggle(status);
+        console.log(status);
+        this.#renderLoading();
+        break;
+      case(LoadStatus.LOADED):
+        this.#menuComponent.disableControlToggle(status);
+        remove(this.#loadingComponent);
+        this.#isLoading = LoadStatus.LOADED;
+
+        console.log(status);
+        break;
+    }
   }
 }

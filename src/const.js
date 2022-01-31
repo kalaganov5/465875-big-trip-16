@@ -30,3 +30,8 @@ export const MenuItem = {
   TRIP_POINTS: 'TRIP_POINTS',
   STATISTICS: 'STATISTICS',
 };
+
+export const LoadStatus = {
+  LOADING: 'LOADING',
+  LOADED: 'LOADED',
+};
