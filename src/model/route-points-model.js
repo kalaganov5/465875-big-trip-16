@@ -1,7 +1,17 @@
 import AbstractObservable from '../utils/abstract-observable.js';
 
 export default class RoutePointsModel extends AbstractObservable {
+  #apiService = null;
   #routePoints = [];
+
+  constructor (apiService) {
+    super();
+    this.#apiService = apiService;
+
+    this.#apiService.tripPoints.then((tripPoints) => {
+      const adaptToClient = tripPoints.map(this.#adaptToClient);
+    });
+  }
 
   set routePoints(routePoints) {
     this.#routePoints = [...routePoints];
@@ -49,5 +59,28 @@ export default class RoutePointsModel extends AbstractObservable {
     ];
 
     this._notify(updateType);
+  }
+
+  #adaptToClient = (tripPoints) => {
+    const adaptedTripPoints = {
+      ...tripPoints,
+      timeStart: new Date(tripPoints['date_from']),
+      timeEnd: new Date(tripPoints['date_to']),
+      info: {
+        description: tripPoints.destination.description,
+        photos: tripPoints.destination.pictures,
+      },
+      destination: tripPoints.destination.name,
+      price: tripPoints.base_price,
+      isFavorite: tripPoints.is_favorite,
+    };
+
+    // Ненужные ключи мы удаляем
+    delete adaptedTripPoints['date_from'];
+    delete adaptedTripPoints['date_to'];
+    delete adaptedTripPoints['base_price'];
+    delete adaptedTripPoints['is_favorite'];
+
+    return adaptedTripPoints;
   }
 }
