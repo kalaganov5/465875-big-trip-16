@@ -77,7 +77,7 @@ const setInfo = (description, images) => {
   }
   const imageLayout = [];
   for (const image of images) {
-    imageLayout.push(`<img class="event__photo" src="${image}" alt="Event photo"></img>`);
+    imageLayout.push(`<img class="event__photo" src="${image.src}" alt="${image.description}"></img>`);
   }
   return `
   <section class="event__section  event__section--destination">
