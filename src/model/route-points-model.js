@@ -25,20 +25,27 @@ export default class RoutePointsModel extends AbstractObservable {
     this._notify(UpdateType.INIT);
   }
 
-  updateRoutePoints = (updateType, update) => {
+  updateRoutePoints = async (updateType, update) => {
     const index = this.#routePoints.findIndex((routePoint) => (routePoint.id === update.id));
 
     if (index === -1) {
       throw new Error ('Can\'t update unexisting routePoint');
     }
 
-    this.#routePoints = [
-      ...this.#routePoints.slice(0, index),
-      update,
-      ...this.#routePoints.slice(index + 1),
-    ];
+    try {
+      const response = await this.#apiService.updateTripPoint(update);
+      const updatedTripPoint = this.#adaptToClient(response);
 
-    this._notify(updateType, update);
+      this.#routePoints = [
+        ...this.#routePoints.slice(0, index),
+        updatedTripPoint,
+        ...this.#routePoints.slice(index + 1),
+      ];
+
+      this._notify(updateType, updatedTripPoint);
+    } catch(error) {
+      throw new Error('Can\'t update routePoint');
+    }
   }
 
   addRoutePoint = (updateType, update) => {

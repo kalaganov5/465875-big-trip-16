@@ -13,12 +13,12 @@ export default class ApiService {
   }
 
   get tripPoints () {
-    return this.#load({url: '/points'}).then(ApiService.parseResponse);
+    return this.#load({url: 'points'}).then(ApiService.parseResponse);
   }
 
-  updateTripPoints = async (tripPoint) => {
+  updateTripPoint = async (tripPoint) => {
     const response = await this.#load({
-      url: `/points:${tripPoint.id}`,
+      url: `points/${tripPoint.id}`,
       method: Method.PUT,
       body: JSON.stringify(this.#adaptToServer(tripPoint)),
       headers: new Headers({'Content-Type': 'application/json'}),
@@ -66,7 +66,7 @@ export default class ApiService {
         description: tripPoints.info.description,
         pictures: tripPoints.info.photos,
       },
-      'base_price': tripPoints.price,
+      'base_price': +tripPoints.price,
       'is_favorite': tripPoints.isFavorite,
     };
 
