@@ -1,23 +1,7 @@
 import AbstractView from './abstract-view.js';
 import Chart from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
-import {makeItemsUnique, costByType, countTripPointsByType, timeByType, minutesToHumanFormat} from './utils.js';
-
-/**
- *
- * @param {object} dateTime объект, пример {day: '02', hour: '00', minute: 33}
- * @returns строка в формате:
- * Менее часа: минуты (например, 23M);
- * Менее суток: часы минуты (например, 02H 44M или 12H 00M, если минуты равны нулю);
- * Более суток: дни часы минуты (например, 01D 02H 30M или 07D 00H 00M, если часы и/или минуты равны нулю).
- */
-const setOutputLayoutDateTime = (dateTime) => {
-  const {day, hour, minute} = dateTime;
-  const dayLayout = `${+day > 0 ? `${day}D ` : ''}`;
-  const hourLayout = `${+hour > 0 || +day > 0 ? `${hour}H `: ''}`;
-  const minuteLayout = `${+minute > 0 || +hour > 0 || +day > 0 ? `${minute}M` : ''}`;
-  return `${dayLayout ? dayLayout : ''} ${hourLayout ? hourLayout : ''} ${minuteLayout ? minuteLayout : ''}`;
-};
+import {makeItemsUnique, costByType, countTripPointsByType, timeByType, minutesToHumanFormat, setOutputLayoutDateTime} from './utils.js';
 
 export const createStatisticTemplate = () => (
   `<section class="statistics">
