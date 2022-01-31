@@ -63,7 +63,6 @@ export default class StatisticsView extends AbstractView {
 
   #renderMoneyChart = () => {
     const moneyCtx = this.element.querySelector('#money');
-    moneyCtx.height = this.#BAR_HEIGHT * 5;
 
     const tripPointTypes = this.#routePoints.map((tripPoint) => tripPoint.type);
     const uniquerTypes = makeItemsUnique(tripPointTypes);
@@ -72,6 +71,8 @@ export default class StatisticsView extends AbstractView {
     const sortedTypesByCost = uniquerTypes
       .map((type, index) => ({[type]: costsByType[index]}))
       .sort((itemA, itemB) => (Object.values(itemB)[0] - Object.values(itemA)[0]));
+
+    moneyCtx.height = this.#BAR_HEIGHT * sortedTypesByCost.length;
 
     const sortedTypes = [];
     const sortedCosts = [];
@@ -149,7 +150,6 @@ export default class StatisticsView extends AbstractView {
 
   #renderTypeChart = () => {
     const typeCtx = this.element.querySelector('#type');
-    typeCtx.height = this.#BAR_HEIGHT * 5;
 
     const tripPointTypes = this.#routePoints.map((tripPoint) => tripPoint.type);
     const uniquerTypes = makeItemsUnique(tripPointTypes);
@@ -157,6 +157,8 @@ export default class StatisticsView extends AbstractView {
     const tripPointByTypeCounts = uniquerTypes
       .map((type) => ({[type]: countTripPointsByType(this.#routePoints, type)}))
       .sort((itemA, itemB) => (Object.values(itemB)[0] - Object.values(itemA)[0]));
+
+    typeCtx.height = this.#BAR_HEIGHT * tripPointByTypeCounts.length;
 
     const sortedTypes = [];
     const sortedTypeCounts = [];
@@ -234,7 +236,6 @@ export default class StatisticsView extends AbstractView {
 
   #renderTimeByTypeChart = () => {
     const timeByTypeCtx = this.element.querySelector('#time');
-    timeByTypeCtx.height = this.#BAR_HEIGHT * 5;
 
     const tripPointTypes = this.#routePoints.map((tripPoint) => tripPoint.type);
     const uniquerTypes = makeItemsUnique(tripPointTypes);
@@ -242,6 +243,9 @@ export default class StatisticsView extends AbstractView {
     const tripPointByTypeTime = uniquerTypes
       .map((type) => ({[type]: timeByType(this.#routePoints, type)}))
       .sort((itemA, itemB) => (Object.values(itemB)[0] - Object.values(itemA)[0]));
+
+    // расчет высоты канваса
+    timeByTypeCtx.height = this.#BAR_HEIGHT * tripPointByTypeTime.length;
 
     const sortedTypes = [];
     const sortedMinutes = [];
