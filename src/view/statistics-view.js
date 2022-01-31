@@ -55,6 +55,25 @@ export default class StatisticsView extends AbstractView {
     return createStatisticTemplate();
   }
 
+  removeElement = () => {
+    super.removeElement();
+
+    if (this.#moneyChart) {
+      this.#moneyChart.destroy();
+      this.#moneyChart = null;
+    }
+
+    if (this.#typeChart) {
+      this.#typeChart.destroy();
+      this.#typeChart = null;
+    }
+
+    if (this.#durationChart) {
+      this.#durationChart.destroy();
+      this.#durationChart = null;
+    }
+  }
+
   #setCharts = () => {
     this.#moneyChart = this.#renderMoneyChart();
     this.#typeChart = this.#renderTypeChart();
