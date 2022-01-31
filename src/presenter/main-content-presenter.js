@@ -5,6 +5,7 @@ import TripPointEmptyView from '../view/trip-point-empty-view.js';
 import StatisticsView from '../view/statistics-view.js';
 import TripPointPresenter from './trip-point-presenter.js';
 import CreatePointPresenter from './create-point-presenter.js';
+import LoadingView from '../view/loading-view.js';
 
 import {filter} from '../utils/filter.js';
 import {sortDurationDescending, sortPriceDescending, sortDayAscending, remove} from '../utils/common.js';
@@ -26,7 +27,7 @@ export default class MainContentPresenter {
   #sortComponent = null;
   #tripPointEmptyComponent = null;
   #tripPointContainerComponent = new TripPointContainerView();
-
+  #loadingComponent = new LoadingView();
   #statisticsComponent = null;
 
   #tripPointPresenter = new Map();
@@ -34,6 +35,7 @@ export default class MainContentPresenter {
   #filterPresenter = null;
 
   #addNewTripPointButton = null;
+  #isLoading = true;
   /**
    * Creates an instance of MainContentPresenter.
    * @param {*} menuContainer
@@ -49,6 +51,7 @@ export default class MainContentPresenter {
 
     this.#routePointsModel = routePointsModel;
     this.#routePointsModel.addObserver(this.#handleModelEvent);
+    this.#routePointsModel.init();
 
     this.#filterModel = filterModel;
 
@@ -89,6 +92,10 @@ export default class MainContentPresenter {
     this.#renderTripPoints();
 
     this.#tripPointNewPresenter = new CreatePointPresenter(this.#tripPointContainerComponent, this.#handleViewAction, this.#addNewTripPointButton);
+
+    if (this.#isLoading) {
+      this.#renderLoading();
+    }
   }
 
   #handleViewAction = (actionType, updateType, update) => {
@@ -115,6 +122,11 @@ export default class MainContentPresenter {
       case UpdateType.MAJOR:
         this.#clearContent();
         this.#currentSortType = SortType.DEFAULT;
+        this.init();
+        break;
+      case UpdateType.INIT:
+        this.#isLoading = false;
+        remove(this.#loadingComponent);
         this.init();
         break;
     }
@@ -207,8 +219,16 @@ export default class MainContentPresenter {
   }
 
   #renderNoTripPoint = () => {
+    if (this.#isLoading) {
+      return;
+    }
+    remove(this.#loadingComponent);
     this.#tripPointEmptyComponent = new TripPointEmptyView(this.#filterType);
     renderElement(this.#contentContainer, this.#tripPointEmptyComponent, RenderPosition.BEFOREEND);
+  }
+
+  #renderLoading = () => {
+    renderElement(this.#contentContainer, this.#loadingComponent, RenderPosition.BEFOREEND);
   }
 
   #createTripPoint = () => {
