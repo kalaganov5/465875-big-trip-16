@@ -22,8 +22,6 @@ const sortAndContentContainer = document.querySelector('.trip-events');
 // :END Контейнеры
 
 const filterPresenter = new FilterTripPointPresenter(filterContainer, filterTripPointsModel, routePointsModel);
-const presenter = new MainContentPresenter(menuContainer, addNewTripPointButton, sortAndContentContainer, routePointsModel, filterTripPointsModel);
+const presenter = new MainContentPresenter(menuContainer, addNewTripPointButton, sortAndContentContainer, routePointsModel, filterTripPointsModel, filterPresenter);
 presenter.init();
-filterPresenter.init();
-
 

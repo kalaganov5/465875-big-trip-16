@@ -1,3 +1,6 @@
+export const DAY_OF_MINUTES = 1440;
+export const HOUR_OF_MINUTES = 60;
+
 export const UserAction = {
   UPDATE_ROUTE_POINT: 'UPDATE_ROUTE_POINT',
   ADD_ROUTE_POINT: 'ADD_ROUTE_POINT',
@@ -20,4 +23,9 @@ export const FilterType = {
   EVERYTHING: 'EVERYTHING',
   FUTURE: 'FUTURE',
   PAST: 'PAST',
+};
+
+export const MenuItem = {
+  TRIP_POINTS: 'TRIP_POINTS',
+  STATISTICS: 'STATISTICS',
 };

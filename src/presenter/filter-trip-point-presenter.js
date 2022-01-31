@@ -49,4 +49,9 @@ export default class FilterTripPointPresenter {
   #handleModelEvent = () => {
     this.init();
   }
+
+  destroy = () => {
+    remove(this.#filterComponent);
+    this.#filterComponent = null;
+  }
 }

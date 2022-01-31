@@ -2,18 +2,20 @@ import MenuView from '../view/menu-view.js';
 import SortView from '../view/sort-view.js';
 import TripPointContainerView from '../view/trip-point-container-view.js';
 import TripPointEmptyView from '../view/trip-point-empty-view.js';
+import StatisticsView from '../view/statistics-view.js';
 import TripPointPresenter from './trip-point-presenter.js';
 import CreatePointPresenter from './create-point-presenter.js';
 
 import {filter} from '../utils/filter.js';
 import {sortDurationDescending, sortPriceDescending, sortDayAscending, remove} from '../utils/common.js';
 import {RenderPosition, renderElement, replace} from '../utils/render.js';
-import {SortType, UserAction, UpdateType, FilterType} from '../const.js';
+import {SortType, UserAction, UpdateType, FilterType, MenuItem} from '../const.js';
 
 export default class MainContentPresenter {
   #menuContainer = null;
   #contentContainer = null;
 
+  #currentMenuItem = MenuItem.TRIP_POINTS;
   #currentSortType = SortType.DEFAULT;
   #filterType = null;
 
@@ -25,8 +27,11 @@ export default class MainContentPresenter {
   #tripPointEmptyComponent = null;
   #tripPointContainerComponent = new TripPointContainerView();
 
+  #statisticsComponent = null;
+
   #tripPointPresenter = new Map();
   #tripPointNewPresenter = null;
+  #filterPresenter = null;
 
   #addNewTripPointButton = null;
   /**
@@ -37,7 +42,7 @@ export default class MainContentPresenter {
    * @param {*} routePointsModel
    * @memberof MainContentPresenter
    */
-  constructor (menuContainer, addNewTripPointButton, contentContainer, routePointsModel, filterModel) {
+  constructor (menuContainer, addNewTripPointButton, contentContainer, routePointsModel, filterModel, filterPresenter) {
     this.#menuContainer = menuContainer;
     this.#addNewTripPointButton = addNewTripPointButton;
     this.#contentContainer = contentContainer;
@@ -45,10 +50,11 @@ export default class MainContentPresenter {
     this.#routePointsModel = routePointsModel;
     this.#routePointsModel.addObserver(this.#handleModelEvent);
 
-    this.#tripPointNewPresenter = new CreatePointPresenter(this.#tripPointContainerComponent, this.#handleViewAction, this.#addNewTripPointButton);
-
     this.#filterModel = filterModel;
-    this.#filterModel.addObserver(this.#handleModelEvent);
+
+    this.#filterPresenter = filterPresenter;
+
+    this.#addTripPointButtonHandler();
   }
 
   get routePoints() {
@@ -67,14 +73,22 @@ export default class MainContentPresenter {
   init = () => {
     if (this.#menuComponent === null) {
       this.#menuComponent = new MenuView();
+      this.#menuComponent.setMenuClickHandler(this.#menuClickHandler);
       this.#renderMenu();
     }
 
-    this.#addTripPointButtonHandler();
+    if (this.#statisticsComponent !== null) {
+      remove(this.#statisticsComponent);
+    }
 
+    this.#filterModel.addObserver(this.#handleModelEvent);
+    this.#filterPresenter.init();
+
+    this.#tripPointContainerComponent = new TripPointContainerView();
     this.#renderTripPointContainer();
-
     this.#renderTripPoints();
+
+    this.#tripPointNewPresenter = new CreatePointPresenter(this.#tripPointContainerComponent, this.#handleViewAction, this.#addNewTripPointButton);
   }
 
   #handleViewAction = (actionType, updateType, update) => {
@@ -110,6 +124,32 @@ export default class MainContentPresenter {
   #handleModeChange = () => {
     this.#tripPointNewPresenter.destroy();
     this.#tripPointPresenter.forEach((presenter) => presenter.resetView());
+  }
+
+  #menuClickHandler = (currentMenuItem) => {
+    // для того чтобы не обрабатывать тот-же пункт меню
+    if (currentMenuItem === this.#currentMenuItem) {
+      return;
+    }
+
+    switch (currentMenuItem) {
+      case MenuItem.TRIP_POINTS:
+        this.#currentMenuItem = currentMenuItem;
+        this.init();
+        break;
+      case MenuItem.STATISTICS:
+        this.#currentMenuItem = currentMenuItem;
+        this.#filterPresenter.destroy();
+        this.#filterModel.removeObserver(this.#handleModelEvent);
+
+        remove(this.#tripPointContainerComponent);
+        this.#clearContent();
+
+        // Показать статистику
+        this.#statisticsComponent = new StatisticsView(this.routePoints);
+        renderElement(this.#contentContainer, this.#statisticsComponent, RenderPosition.AFTEREND);
+        break;
+    }
   }
 
   #renderMenu = () => {
@@ -184,6 +224,11 @@ export default class MainContentPresenter {
   #addTripPointButtonHandler = () => {
     this.#addNewTripPointButton.addEventListener('click', (evt) => {
       evt.preventDefault();
+      if (this.#currentMenuItem === MenuItem.STATISTICS) {
+        this.#currentMenuItem = MenuItem.TRIP_POINTS;
+        this.#menuComponent.toggleMenu(this.#currentMenuItem);
+        this.init();
+      }
       this.#createTripPoint();
     });
   }
