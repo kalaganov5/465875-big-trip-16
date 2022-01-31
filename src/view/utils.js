@@ -1,3 +1,4 @@
+import {DAY_OF_MINUTES, HOUR_OF_MINUTES} from '../const.js';
 import dayjs from 'dayjs';
 
 /**
@@ -21,8 +22,6 @@ const createLeadingZero = (number) => (number <= 9 ? `0${number}` : number);
  * @returns объект {day, hour, minute}
  */
 export const calculateDate = (dateA, dateB) => {
-  const DAY_OF_MINUTES = 1440;
-  const HOUR_OF_MINUTES = 60;
   const durationMinutes = dayjs(dateB).diff(dateA, 'minute');
   const day = Math.trunc(durationMinutes / DAY_OF_MINUTES);
   const hour = Math.trunc(
@@ -106,8 +105,6 @@ export const timeByType = (tripPoints, type) => {
 };
 
 export const minutesToHumanFormat = (minutes) => {
-  const DAY_OF_MINUTES = 1440;
-  const HOUR_OF_MINUTES = 60;
   const day = Math.trunc(minutes / DAY_OF_MINUTES);
   const hour = Math.trunc(
     (minutes % DAY_OF_MINUTES) / HOUR_OF_MINUTES
