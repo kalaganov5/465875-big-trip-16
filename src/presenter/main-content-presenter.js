@@ -97,14 +97,18 @@ export default class MainContentPresenter {
       (this.#offersTripPoint === null || this.#destinationsTripPoint === null)) {
       this.#offersTripPoint = this.#routePointsModel.offers;
       this.#destinationsTripPoint = this.#routePointsModel.destinations;
-    }
+      this.#tripPointContainerComponent = new TripPointContainerView();
 
-    this.#tripPointContainerComponent = new TripPointContainerView();
+      this.#tripPointNewPresenter = new CreatePointPresenter(
+        this.#tripPointContainerComponent,
+        this.#handleViewAction,
+        this.#addNewTripPointButton,
+        this.#offersTripPoint,
+        this.#destinationsTripPoint
+      );
+    }
     this.#renderTripPointContainer();
     this.#renderTripPoints();
-
-    this.#tripPointNewPresenter = new CreatePointPresenter(this.#tripPointContainerComponent, this.#handleViewAction, this.#addNewTripPointButton);
-
   }
 
   #handleViewAction = (actionType, updateType, update) => {

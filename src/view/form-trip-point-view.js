@@ -2,9 +2,13 @@ import {humanReadableDate, generateSelectCities, firstLetterToUpperCase, checkIt
 import SmartView from './smart-view.js';
 import flatpickr from 'flatpickr';
 import dayjs from 'dayjs';
-import {nanoid} from 'nanoid';
 
 import '../../node_modules/flatpickr/dist/flatpickr.min.css';
+
+const FormStatus = {
+  DESTINATION: false,
+  PRICE_VALID: false,
+};
 
 /**
  *
@@ -97,9 +101,10 @@ const setInfo = (description, images) => {
  * @param {Object} routePoint данные о точке маршрута
  * @returns заполненная форма создания или редактирования точки маршрута
  */
-const createFormPointTemplate = (routePoint, offersTripPoint, destinationsTripPoint, routeCities) => {
+const createFormPointTemplate = (routePoint, offersTripPoint, isSubmitDisable, routeCities) => {
   const offersTrip = offersTripPoint;
   const cities = routeCities;
+  const isSubmitButtonDisable = isSubmitDisable;
   const {timeStart, timeEnd, type, destination, price, offers, info, isCreateTripPoint} = routePoint;
 
   const typesTripPoint = offersTrip.map((offer) => offer.type);
@@ -147,7 +152,7 @@ const createFormPointTemplate = (routePoint, offersTripPoint, destinationsTripPo
           <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${price}">
         </div>
 
-        <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
+        <button class="event__save-btn  btn  btn--blue" type="submit" ${isSubmitButtonDisable ? 'disabled' : ''}>Save</button>
         <button class="event__reset-btn" type="reset">${isCreateTripPoint ? 'Cancel' : 'Delete'}</button>
         ${isCreateTripPoint ? '' : '<button class="event__rollup-btn" type="button"><span class="visually-hidden">Open event</span></button>'}
       </header>
@@ -175,6 +180,9 @@ export default class FormTripPointView extends SmartView {
   #offersTripPoint = null;
   #destinationsTripPoint = null;
 
+  #submitButton = null;
+  #isSubmitDisabled = null;
+
   /**
    * Creates an instance of FormTripPointView.
    * @param {object} tripPoint данные о точке маршрута
@@ -189,11 +197,14 @@ export default class FormTripPointView extends SmartView {
     if (tripPointData === undefined) {
       tripPointData = this.#tripPointBlank;
       isCreateRoutePointEvent = true;
+      this.#isSubmitDisabled = true;
     }
+
+    FormStatus.DESTINATION = !isCreateRoutePointEvent;
+    FormStatus.PRICE_VALID = !isCreateRoutePointEvent;
 
     this.#offersTripPoint = offersTripPoint;
     this.#destinationsTripPoint = destinationsTripPoint;
-
     this.#routeCities = this.#destinationsTripPoint.map((destinationTripPoint) => (destinationTripPoint.name));
     this.#typesTripPoint = this.#offersTripPoint.map((offer) => offer.type);
 
@@ -218,7 +229,7 @@ export default class FormTripPointView extends SmartView {
   }
 
   get template() {
-    return createFormPointTemplate(this._data, this.#offersTripPoint, this.#destinationsTripPoint, this.#routeCities);
+    return createFormPointTemplate(this._data, this.#offersTripPoint, this.#isSubmitDisabled, this.#routeCities);
   }
 
   static parseTripPointToData = (tripPoint, isCreateTripPoint) => ({...tripPoint,
@@ -307,20 +318,28 @@ export default class FormTripPointView extends SmartView {
     evt.preventDefault();
 
     const newDestinationData = this.#destinationsTripPoint.find((item) => (item.name === evt.target.value));
-
-    if (newDestinationData.name === '') {
+    const newDestinationName = typeof newDestinationData === 'object' ? newDestinationData.name : '';
+    if (newDestinationName === '') {
       evt.target.setCustomValidity('Select from the list');
+      FormStatus.DESTINATION = false;
+      this.#toggleSubmitButton();
     } else {
       evt.target.setCustomValidity('');
+      FormStatus.DESTINATION = true;
       this.updateData(
         {
           destination: newDestinationData.name,
           info: {
             description: newDestinationData.description,
             photos: newDestinationData.pictures
-          }
+          },
+          price: +this._data.price,
         }
       );
+      if (+this._data.price > 0) {
+        FormStatus.PRICE_VALID = true;
+      }
+      this.#toggleSubmitButton();
     }
   }
 
@@ -329,10 +348,15 @@ export default class FormTripPointView extends SmartView {
     const newPrice = Number(evt.target.value);
     if (newPrice < 1) {
       evt.target.setCustomValidity('Price must be greater than 0');
+      FormStatus.PRICE_VALID = false;
+      this.#toggleSubmitButton();
     } else {
       evt.target.setCustomValidity('');
+      FormStatus.PRICE_VALID = true;
+      this.#toggleSubmitButton();
+
       this.updateData(
-        {price: evt.target.value,},
+        {price: +evt.target.value,},
         true,
       );
     }
@@ -344,7 +368,7 @@ export default class FormTripPointView extends SmartView {
     const changedOfferId = evt.target.dataset.offerId;
 
     const availableOffers = this.#offersTripPoint.find((offer) => (offer.type === this._data.type)).offers;
-    // console.log(availableOffers)
+
     const changedOffer = availableOffers.find((offer) => (+offer.id === +changedOfferId));
 
     if (evt.target.checked) {
@@ -417,13 +441,21 @@ export default class FormTripPointView extends SmartView {
     this._callback.formDeleteHandler();
   }
 
+  #toggleSubmitButton = () => {
+    this.#submitButton = this.element.querySelector('.event__save-btn');
+    if (FormStatus.DESTINATION !== false && FormStatus.PRICE_VALID !== false) {
+      this.#submitButton.disabled = false;
+    } else {
+      this.#submitButton.disabled = true;
+    }
+  }
+
   #tripPointBlank = {
-    id: nanoid(),
-    destination: 'Amsterdam',
+    destination: '',
     type: 'taxi',
     info: {
       description: '',
-      photos: [],
+      photos: '',
     },
     offers: [],
     price: 0,

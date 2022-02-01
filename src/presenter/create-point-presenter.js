@@ -8,20 +8,23 @@ export default class CreatePointPresenter {
   #changeData = null;
   #tripPointFormComponent = null;
   #addNewPointButton = null;
+  #offersTripPoint = null;
+  #destinationsTripPoint = null;
 
-  constructor (tripPointContainer, changeData, addNewPointButton) {
+  constructor (tripPointContainer, changeData, addNewPointButton, offersTripPoint, destinationsTripPoint) {
     this.#tripPointContainer = tripPointContainer;
     this.#changeData = changeData;
     this.#addNewPointButton = addNewPointButton;
+
+    this.#offersTripPoint = offersTripPoint;
+    this.#destinationsTripPoint = destinationsTripPoint;
   }
 
   init = () => {
     this.#addNewPointButton.disabled = true;
-
-    this.#tripPointFormComponent = new FormTripPointView();
+    this.#tripPointFormComponent = new FormTripPointView(undefined, this.#offersTripPoint, this.#destinationsTripPoint);
     this.#tripPointFormComponent.setFormSubmitHandler(this.#formSubmitHandler);
     this.#tripPointFormComponent.setDeleteHandler(this.#formDeleteHandler);
-
     renderElement(this.#tripPointContainer, this.#tripPointFormComponent, RenderPosition.AFTERBEGIN);
 
     document.addEventListener('keydown', this.#onEscKeyDown);
