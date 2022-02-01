@@ -192,8 +192,11 @@ export default class MainContentPresenter {
         break;
       case MenuItem.STATISTICS:
         this.#currentMenuItem = currentMenuItem;
+
         this.#filterPresenter.destroy();
         this.#filterModel.removeObserver(this.#handleModelEvent);
+        // Возвращаем стартовый тип фильтра
+        this.#filterModel.setFilterType(FilterType.EVERYTHING);
 
         remove(this.#tripPointContainerComponent);
         this.#clearContent();
@@ -281,21 +284,25 @@ export default class MainContentPresenter {
   #createTripPoint = () => {
     this.#currentSortType = SortType.DEFAULT;
     this.#filterModel.setFilter(UpdateType.MAJOR, FilterType.EVERYTHING);
+
     if (this.#tripPointEmptyComponent !== null) {
       replace(this.#tripPointContainerComponent, this.#tripPointEmptyComponent);
       this.#tripPointEmptyComponent = null;
     }
+
     this.#tripPointNewPresenter.init();
   }
 
   #addTripPointButtonHandler = () => {
     this.#addNewTripPointButton.addEventListener('click', (evt) => {
       evt.preventDefault();
+
       if (this.#currentMenuItem === MenuItem.STATISTICS) {
         this.#currentMenuItem = MenuItem.TRIP_POINTS;
         this.#menuComponent.toggleMenu(this.#currentMenuItem);
         this.init();
       }
+
       this.#createTripPoint();
     });
   }
