@@ -374,11 +374,10 @@ export default class FormTripPointView extends SmartView {
   #formOffersPointHandler = (evt) => {
     evt.preventDefault();
     let pointOffers = [...this._data.offers];
-    const changedOfferId = evt.target.dataset.offerId;
-
+    const changedOfferId = +evt.target.dataset.offerId;
     const availableOffers = this.#offersTripPoint.find((offer) => (offer.type === this._data.type)).offers;
 
-    const changedOffer = availableOffers.find((offer) => (+offer.id === +changedOfferId));
+    const changedOffer = availableOffers.find((offer) => (offer.id === changedOfferId));
 
     if (evt.target.checked) {
       pointOffers.push(changedOffer);
