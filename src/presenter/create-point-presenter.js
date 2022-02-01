@@ -1,7 +1,6 @@
 import {renderElement, RenderPosition} from '../utils/render.js';
 import {UserAction, UpdateType} from '../const.js';
 import FormTripPointView from '../view/form-trip-point-view.js';
-import {nanoid} from 'nanoid';
 import {remove} from '../utils/common.js';
 
 export default class CreatePointPresenter {
@@ -9,20 +8,23 @@ export default class CreatePointPresenter {
   #changeData = null;
   #tripPointFormComponent = null;
   #addNewPointButton = null;
+  #offersTripPoint = null;
+  #destinationsTripPoint = null;
 
-  constructor (tripPointContainer, changeData, addNewPointButton) {
+  constructor (tripPointContainer, changeData, addNewPointButton, offersTripPoint, destinationsTripPoint) {
     this.#tripPointContainer = tripPointContainer;
     this.#changeData = changeData;
     this.#addNewPointButton = addNewPointButton;
+
+    this.#offersTripPoint = offersTripPoint;
+    this.#destinationsTripPoint = destinationsTripPoint;
   }
 
   init = () => {
     this.#addNewPointButton.disabled = true;
-
-    this.#tripPointFormComponent = new FormTripPointView();
+    this.#tripPointFormComponent = new FormTripPointView(undefined, this.#offersTripPoint, this.#destinationsTripPoint);
     this.#tripPointFormComponent.setFormSubmitHandler(this.#formSubmitHandler);
     this.#tripPointFormComponent.setDeleteHandler(this.#formDeleteHandler);
-
     renderElement(this.#tripPointContainer, this.#tripPointFormComponent, RenderPosition.AFTERBEGIN);
 
     document.addEventListener('keydown', this.#onEscKeyDown);
@@ -44,9 +46,7 @@ export default class CreatePointPresenter {
     this.#changeData(
       UserAction.ADD_ROUTE_POINT,
       UpdateType.MAJOR,
-      // Пока у нас нет сервера, который бы после сохранения
-      // выдавал честный id задачи, нам нужно позаботиться об этом самим
-      {id: nanoid(), ...tripPoint},
+      tripPoint,
     );
     this.destroy();
   }

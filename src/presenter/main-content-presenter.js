@@ -5,11 +5,12 @@ import TripPointEmptyView from '../view/trip-point-empty-view.js';
 import StatisticsView from '../view/statistics-view.js';
 import TripPointPresenter from './trip-point-presenter.js';
 import CreatePointPresenter from './create-point-presenter.js';
+import LoadingView from '../view/loading-view.js';
 
 import {filter} from '../utils/filter.js';
 import {sortDurationDescending, sortPriceDescending, sortDayAscending, remove} from '../utils/common.js';
 import {RenderPosition, renderElement, replace} from '../utils/render.js';
-import {SortType, UserAction, UpdateType, FilterType, MenuItem} from '../const.js';
+import {SortType, UserAction, UpdateType, FilterType, MenuItem, LoadStatus} from '../const.js';
 
 export default class MainContentPresenter {
   #menuContainer = null;
@@ -19,6 +20,9 @@ export default class MainContentPresenter {
   #currentSortType = SortType.DEFAULT;
   #filterType = null;
 
+  #offersTripPoint = null;
+  #destinationsTripPoint = null;
+
   #routePointsModel = null;
   #filterModel = null;
 
@@ -26,7 +30,7 @@ export default class MainContentPresenter {
   #sortComponent = null;
   #tripPointEmptyComponent = null;
   #tripPointContainerComponent = new TripPointContainerView();
-
+  #loadingComponent = new LoadingView();
   #statisticsComponent = null;
 
   #tripPointPresenter = new Map();
@@ -34,6 +38,7 @@ export default class MainContentPresenter {
   #filterPresenter = null;
 
   #addNewTripPointButton = null;
+  #isLoading = LoadStatus.LOADING;
   /**
    * Creates an instance of MainContentPresenter.
    * @param {*} menuContainer
@@ -49,6 +54,8 @@ export default class MainContentPresenter {
 
     this.#routePointsModel = routePointsModel;
     this.#routePointsModel.addObserver(this.#handleModelEvent);
+    this.#routePointsModel.init();
+    this.#disablingControlWhileLoadingToggle(this.#isLoading);
 
     this.#filterModel = filterModel;
 
@@ -71,7 +78,7 @@ export default class MainContentPresenter {
   }
 
   init = () => {
-    if (this.#menuComponent === null) {
+    if (this.#menuComponent === null && this.#isLoading === LoadStatus.LOADED) {
       this.#menuComponent = new MenuView();
       this.#menuComponent.setMenuClickHandler(this.#menuClickHandler);
       this.#renderMenu();
@@ -82,13 +89,26 @@ export default class MainContentPresenter {
     }
 
     this.#filterModel.addObserver(this.#handleModelEvent);
-    this.#filterPresenter.init();
+    if (this.#isLoading === LoadStatus.LOADED) {
+      this.#filterPresenter.init();
+    }
 
-    this.#tripPointContainerComponent = new TripPointContainerView();
+    if (this.#isLoading === LoadStatus.LOADED &&
+      (this.#offersTripPoint === null || this.#destinationsTripPoint === null)) {
+      this.#offersTripPoint = this.#routePointsModel.offers;
+      this.#destinationsTripPoint = this.#routePointsModel.destinations;
+      this.#tripPointContainerComponent = new TripPointContainerView();
+
+      this.#tripPointNewPresenter = new CreatePointPresenter(
+        this.#tripPointContainerComponent,
+        this.#handleViewAction,
+        this.#addNewTripPointButton,
+        this.#offersTripPoint,
+        this.#destinationsTripPoint
+      );
+    }
     this.#renderTripPointContainer();
     this.#renderTripPoints();
-
-    this.#tripPointNewPresenter = new CreatePointPresenter(this.#tripPointContainerComponent, this.#handleViewAction, this.#addNewTripPointButton);
   }
 
   #handleViewAction = (actionType, updateType, update) => {
@@ -115,6 +135,10 @@ export default class MainContentPresenter {
       case UpdateType.MAJOR:
         this.#clearContent();
         this.#currentSortType = SortType.DEFAULT;
+        this.init();
+        break;
+      case UpdateType.INIT:
+        this.#disablingControlWhileLoadingToggle(LoadStatus.LOADED);
         this.init();
         break;
     }
@@ -181,7 +205,13 @@ export default class MainContentPresenter {
 
   #renderTripPoint = (tripPointItem) => {
     // рендер одной точки маршрута
-    const tripPointPresenter = new TripPointPresenter(this.#tripPointContainerComponent, this.#handleViewAction, this.#handleModeChange);
+    const tripPointPresenter = new TripPointPresenter(
+      this.#tripPointContainerComponent,
+      this.#handleViewAction,
+      this.#handleModeChange,
+      this.#offersTripPoint,
+      this.#destinationsTripPoint
+    );
     tripPointPresenter.init(tripPointItem);
     this.#tripPointPresenter.set(tripPointItem.id, tripPointPresenter);
   }
@@ -207,8 +237,16 @@ export default class MainContentPresenter {
   }
 
   #renderNoTripPoint = () => {
+    if (this.#isLoading === LoadStatus.LOADING) {
+      return;
+    }
+    remove(this.#loadingComponent);
     this.#tripPointEmptyComponent = new TripPointEmptyView(this.#filterType);
     renderElement(this.#contentContainer, this.#tripPointEmptyComponent, RenderPosition.BEFOREEND);
+  }
+
+  #renderLoading = () => {
+    renderElement(this.#contentContainer, this.#loadingComponent, RenderPosition.BEFOREEND);
   }
 
   #createTripPoint = () => {
@@ -231,5 +269,19 @@ export default class MainContentPresenter {
       }
       this.#createTripPoint();
     });
+  }
+
+  #disablingControlWhileLoadingToggle = (status = LoadStatus.LOADING) => {
+    switch (status) {
+      case(LoadStatus.LOADING):
+        this.#addNewTripPointButton.disabled = true;
+        this.#renderLoading();
+        break;
+      case(LoadStatus.LOADED):
+        this.#addNewTripPointButton.disabled = false;
+        remove(this.#loadingComponent);
+        this.#isLoading = LoadStatus.LOADED;
+        break;
+    }
   }
 }

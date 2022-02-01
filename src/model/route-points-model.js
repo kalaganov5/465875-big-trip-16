@@ -1,53 +1,127 @@
 import AbstractObservable from '../utils/abstract-observable.js';
+import {UpdateType} from '../const.js';
 
 export default class RoutePointsModel extends AbstractObservable {
+  #apiService = null;
+
+  #destinations = null;
+  #offers = null;
+
   #routePoints = [];
 
-  set routePoints(routePoints) {
-    this.#routePoints = [...routePoints];
+  constructor (apiService) {
+    super();
+    this.#apiService = apiService;
   }
 
   get routePoints() {
     return this.#routePoints;
   }
 
-  updateRoutePoints = (updateType, update) => {
+  get destinations() {
+    return this.#destinations;
+  }
+
+  get offers() {
+    return this.#offers;
+  }
+
+  init = async () => {
+    try {
+      const tripPoints = await this.#apiService.tripPoints;
+      this.#routePoints = tripPoints.map(this.#adaptToClient);
+    } catch (error) {
+      this.#routePoints = [];
+    }
+
+    try {
+      this.#destinations = await this.#apiService.destinations;
+    } catch (error) {
+      throw new Error ('Can\'t get routePoint destinations');
+    }
+
+    try {
+      this.#offers = await this.#apiService.offers;
+    } catch (error) {
+      throw new Error ('Can\'t get routePoint offers');
+    }
+
+    this._notify(UpdateType.INIT);
+  }
+
+  updateRoutePoints = async (updateType, update) => {
     const index = this.#routePoints.findIndex((routePoint) => (routePoint.id === update.id));
 
     if (index === -1) {
       throw new Error ('Can\'t update unexisting routePoint');
     }
 
-    this.#routePoints = [
-      ...this.#routePoints.slice(0, index),
-      update,
-      ...this.#routePoints.slice(index + 1),
-    ];
+    try {
+      const response = await this.#apiService.updateTripPoint(update);
+      const updatedTripPoint = this.#adaptToClient(response);
 
-    this._notify(updateType, update);
+      this.#routePoints = [
+        ...this.#routePoints.slice(0, index),
+        updatedTripPoint,
+        ...this.#routePoints.slice(index + 1),
+      ];
+
+      this._notify(updateType, updatedTripPoint);
+    } catch(error) {
+      throw new Error('Can\'t update routePoint');
+    }
   }
 
-  addRoutePoint = (updateType, update) => {
-    this.#routePoints = [
-      update,
-      ...this.#routePoints,
-    ];
-
-    this._notify(updateType, update);
+  addRoutePoint = async (updateType, update) => {
+    try {
+      const response = await this.#apiService.addTripPoint(update);
+      const newTripPoint = this.#adaptToClient(response);
+      this.#routePoints = [newTripPoint, ...this.#routePoints];
+      this._notify(updateType, newTripPoint);
+    } catch(err) {
+      throw new Error('Can\'t add route point');
+    }
   }
 
-  deleteRoutePoint = (updateType, update) => {
+  deleteRoutePoint = async (updateType, update) => {
     const index = this.#routePoints.findIndex((routePoint) => (routePoint.id === update.id));
 
     if (index === -1) {
       throw new Error('Can\'t delete unexisting routePoint');
     }
 
-    this.#routePoints = [
-      ...this.#routePoints.slice(0, index),
-      ...this.routePoints.slice(index + 1),
-    ];
+    try {
+      await this.#apiService.deleteTripPoint(update);
+      this.#routePoints = [
+        ...this.#routePoints.slice(0, index),
+        ...this.routePoints.slice(index + 1),
+      ];
+      this._notify(updateType);
+    } catch(err) {
+      throw new Error('Can\'t delete trip point');
+    }
+  }
 
-    this._notify(updateType);
+  #adaptToClient = (tripPoints) => {
+    const adaptedTripPoints = {
+      ...tripPoints,
+      timeStart: new Date(tripPoints['date_from']),
+      timeEnd: new Date(tripPoints['date_to']),
+      info: {
+        description: tripPoints.destination.description,
+        photos: tripPoints.destination.pictures,
+      },
+      destination: tripPoints.destination.name,
+      price: tripPoints.base_price,
+      isFavorite: tripPoints.is_favorite,
+    };
+
+    // Ненужные ключи мы удаляем
+    delete adaptedTripPoints['date_from'];
+    delete adaptedTripPoints['date_to'];
+    delete adaptedTripPoints['base_price'];
+    delete adaptedTripPoints['is_favorite'];
+
+    return adaptedTripPoints;
   }
 }
