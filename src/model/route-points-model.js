@@ -3,6 +3,10 @@ import {UpdateType} from '../const.js';
 
 export default class RoutePointsModel extends AbstractObservable {
   #apiService = null;
+
+  #destinations = null;
+  #offers = null;
+
   #routePoints = [];
 
   constructor (apiService) {
@@ -14,12 +18,32 @@ export default class RoutePointsModel extends AbstractObservable {
     return this.#routePoints;
   }
 
+  get destinations() {
+    return this.#destinations;
+  }
+
+  get offers() {
+    return this.#offers;
+  }
+
   init = async () => {
     try {
       const tripPoints = await this.#apiService.tripPoints;
       this.#routePoints = tripPoints.map(this.#adaptToClient);
     } catch (error) {
       this.#routePoints = [];
+    }
+
+    try {
+      this.#destinations = await this.#apiService.destinations;
+    } catch (error) {
+      throw new Error ('Can\'t get routePoint destinations');
+    }
+
+    try {
+      this.#offers = await this.#apiService.offers;
+    } catch (error) {
+      throw new Error ('Can\'t get routePoint offers');
     }
 
     this._notify(UpdateType.INIT);
