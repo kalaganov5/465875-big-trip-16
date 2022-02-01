@@ -41,6 +41,7 @@ export default class FilterView extends AbstractView {
 
   #filterHandler = (evt) => {
     evt.preventDefault();
+
     if (evt.target.classList.contains('trip-filters__filter-input')) {
       this._callback.filterHandler(evt.target.dataset.filterType);
     }

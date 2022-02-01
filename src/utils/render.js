@@ -32,16 +32,20 @@ export const createElement = (template) => {
 export const renderElement = (container, element, place) => {
   const parentContainer = container instanceof AbstractView ? container.element : container;
   const childElement = element instanceof AbstractView ? element.element : element;
+
   switch (place) {
     case RenderPosition.BEFOREBEGIN:
       parentContainer.before(childElement);
       break;
+
     case RenderPosition.AFTERBEGIN:
       parentContainer.prepend(childElement);
       break;
+
     case RenderPosition.BEFOREEND:
       parentContainer.append(childElement);
       break;
+
     case RenderPosition.AFTEREND:
       parentContainer.after(childElement);
       break;

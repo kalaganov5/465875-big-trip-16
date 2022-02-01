@@ -5,10 +5,7 @@ import dayjs from 'dayjs';
 
 import '../../node_modules/flatpickr/dist/flatpickr.min.css';
 
-const FormStatus = {
-  DESTINATION: '',
-  PRICE_VALID: '',
-};
+const FormStatus = {};
 
 /**
  *
@@ -214,8 +211,6 @@ export default class FormTripPointView extends SmartView {
     this.#setInnerHandlers();
   }
 
-  // Перегружаем метод родителя removeElement,
-  // чтобы при удалении удалялся более не нужный календарь
   removeElement = () => {
     super.removeElement();
 
@@ -245,7 +240,6 @@ export default class FormTripPointView extends SmartView {
   static parseDataToTripPoint = (data) => {
     const tripPointData = {...data};
 
-    // delete key
     delete tripPointData.isCreateTripPoint;
     delete tripPointData.isDisabled;
     delete tripPointData.isSaving;
@@ -327,6 +321,7 @@ export default class FormTripPointView extends SmartView {
 
     const newDestinationData = this.#destinationsTripPoint.find((item) => (item.name === evt.target.value));
     const newDestinationName = typeof newDestinationData === 'object' ? newDestinationData.name : '';
+
     if (newDestinationName === '') {
       evt.target.setCustomValidity('Select from the list');
       FormStatus.DESTINATION = false;
@@ -334,6 +329,7 @@ export default class FormTripPointView extends SmartView {
     } else {
       evt.target.setCustomValidity('');
       FormStatus.DESTINATION = true;
+
       this.updateData(
         {
           destination: newDestinationData.name,
@@ -344,6 +340,7 @@ export default class FormTripPointView extends SmartView {
           price: +this._data.price,
         }
       );
+
       if (+this._data.price > 0) {
         FormStatus.PRICE_VALID = true;
       }

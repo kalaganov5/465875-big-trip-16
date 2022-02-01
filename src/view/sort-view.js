@@ -43,6 +43,7 @@ export default class SortView extends AbstractView {
 
   #sortChangeHandler = (evt) => {
     evt.preventDefault();
+
     if (evt.target.classList.contains('trip-sort__input')) {
       this._callback.sortChangeHandler(evt.target.dataset.sortType);
     }

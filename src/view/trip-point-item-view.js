@@ -1,5 +1,4 @@
-import {TypeIcons} from './const.js';
-import {humanReadableDate, calculateDate, setIconUrl, setOutputLayoutDateTime} from './utils.js';
+import {humanReadableDate, calculateDate, setOutputLayoutDateTime} from './utils.js';
 import AbstractView from './abstract-view.js';
 
 const favoriteButtonActiveClass = 'event__favorite-btn--active';
@@ -13,7 +12,9 @@ const setOffers = (offers) => {
   if (offers.length === 0) {
     return '';
   }
+
   const offerMarkup = [];
+
   for (const offer of offers) {
     const offerElement = `
     <h4 class="visually-hidden">Offers:</h4>
@@ -24,6 +25,7 @@ const setOffers = (offers) => {
       </li>`;
     offerMarkup.push(offerElement);
   }
+
   return `
     <ul class="event__selected-offers">
     ${offerMarkup.join('')}
@@ -44,6 +46,7 @@ const setIsFavorite = (isFavorite) => (isFavorite ? favoriteButtonActiveClass : 
  */
 const createTripPointItemTemplate = (routePoint) => {
   const {timeStart, timeEnd, type, destination, price, isFavorite, offers} = routePoint;
+
   return `<li class="trip-events__item">
     <div class="event">
       <time class="event__date" datetime="
@@ -52,7 +55,7 @@ const createTripPointItemTemplate = (routePoint) => {
         ${humanReadableDate(timeStart, 'MMM D')}
       </time>
       <div class="event__type">
-        <img class="event__type-icon" width="42" height="42" src="${setIconUrl(type, TypeIcons)}" alt="Event type icon">
+        <img class="event__type-icon" width="42" height="42" src="img/icons/${type}.png" alt="Event type icon">
       </div>
       <h3 class="event__title">${type} ${destination}</h3>
       <div class="event__schedule">

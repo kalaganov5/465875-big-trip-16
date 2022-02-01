@@ -57,6 +57,7 @@ export default class MainContentPresenter {
     this.#routePointsModel = routePointsModel;
     this.#routePointsModel.addObserver(this.#handleModelEvent);
     this.#routePointsModel.init();
+
     this.#disablingControlWhileLoadingToggle(this.#isLoading);
 
     this.#filterModel = filterModel;
@@ -70,12 +71,15 @@ export default class MainContentPresenter {
     this.#filterType = this.#filterModel.filterType;
     const routePoints = this.#routePointsModel.routePoints;
     const filteredRoutePoints = filter[this.#filterType](routePoints);
+
     switch (this.#currentSortType) {
       case SortType.PRICE:
         return filteredRoutePoints.sort(sortPriceDescending);
+
       case SortType.TIME:
         return filteredRoutePoints.sort(sortDurationDescending);
     }
+
     return filteredRoutePoints.sort(sortDayAscending);
   }
 
@@ -114,28 +118,30 @@ export default class MainContentPresenter {
   }
 
   #handleViewAction = async (actionType, updateType, update) => {
-    // actionType - действие пользователя, нужно чтобы понять, какой метод модели вызвать
-    // updateType - тип изменений, нужно чтобы понять, что после нужно обновить
-    // update - обновленные данные
     switch (actionType) {
       case (UserAction.UPDATE_ROUTE_POINT):
         this.#tripPointPresenter.get(update.id).setViewState(State.SAVING);
+
         try {
           await this.#routePointsModel.updateRoutePoints(updateType, update);
         } catch (error) {
           this.#tripPointPresenter.get(update.id).setViewState(State.ABORTING);
         }
         break;
+
       case (UserAction.ADD_ROUTE_POINT):
         this.#tripPointNewPresenter.setSaving();
+
         try {
           await this.#routePointsModel.addRoutePoint(updateType, update);
         } catch (error) {
           this.#tripPointNewPresenter.setAborting();
         }
         break;
+
       case (UserAction.DELETE_ROUTE_POINT):
         this.#tripPointPresenter.get(update.id).setViewState(State.DELETING);
+
         try {
           this.#routePointsModel.deleteRoutePoint(updateType, update);
         } catch (error) {
@@ -149,15 +155,18 @@ export default class MainContentPresenter {
       case (UpdateType.MINOR):
         this.#tripPointPresenter.get(data.id).init(data);
         break;
+
       case UpdateType.MAJOR:
         this.#clearContent();
         this.#currentSortType = SortType.DEFAULT;
         this.init();
         break;
+
       case UpdateType.INIT:
         this.#disablingControlWhileLoadingToggle(LoadStatus.LOADED);
         this.init();
         break;
+
       case UpdateType.LOAD_ERROR:
         replace(this.#loadingErrorComponent, this.#loadingComponent);
         break;

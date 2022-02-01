@@ -112,8 +112,7 @@ export default class TripPointPresenter {
       UpdateType.MAJOR,
       tripPoint,
     );
-    // Надо проверить верность
-    // this.#replaceFormToTripPoint();
+    // пусть будет: this.#replaceFormToTripPoint();
   }
 
   #formCloseHandler = () => {
@@ -148,12 +147,14 @@ export default class TripPointPresenter {
           isSaving: true,
         });
         break;
+
       case State.DELETING:
         this.#tripPointFormComponent.updateData({
           isDisabled: true,
           isDeleting: true,
         });
         break;
+
       case State.ABORTING:
         this.#tripPointComponent.shake(resetFormState);
         this.#tripPointFormComponent.shake(resetFormState);

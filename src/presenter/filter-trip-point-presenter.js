@@ -7,19 +7,17 @@ export default class FilterTripPointPresenter {
   #filterContainer = null;
   #filterComponent = null;
   #filterModel = null;
-  #tripPointsModel = null;
 
   /**
    * Creates an instance of FilterTripPointPresenter.
    * @param {*} container контейнер куда должен отрисовываться фильтр
    * @memberof FilterTripPointPresenter
    */
-  constructor (container, filterModel, tripPointsModel) {
+  constructor (container, filterModel) {
     this.#filterContainer = container;
 
     this.#filterModel = filterModel;
 
-    this.#tripPointsModel = tripPointsModel;
     this.#filterModel.addObserver(this.#handleModelEvent);
   }
 
