@@ -69,6 +69,7 @@ export default class MainContentPresenter {
 
   get routePoints() {
     this.#filterType = this.#filterModel.filterType;
+
     const routePoints = this.#routePointsModel.routePoints;
     const filteredRoutePoints = filter[this.#filterType](routePoints);
 
@@ -197,6 +198,9 @@ export default class MainContentPresenter {
         this.#filterModel.removeObserver(this.#handleModelEvent);
         // Возвращаем стартовый тип фильтра
         this.#filterModel.setFilterType(FilterType.EVERYTHING);
+
+        // Возвращаем стартовый тип сортировки
+        this.#currentSortType = SortType.DEFAULT;
 
         remove(this.#tripPointContainerComponent);
         this.#clearContent();
