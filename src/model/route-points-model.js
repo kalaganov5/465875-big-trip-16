@@ -7,6 +7,8 @@ export default class RoutePointsModel extends AbstractObservable {
   #destinations = null;
   #offers = null;
 
+  #isLoadError = false;
+
   #routePoints = [];
 
   constructor (apiService) {
@@ -31,19 +33,24 @@ export default class RoutePointsModel extends AbstractObservable {
       const tripPoints = await this.#apiService.tripPoints;
       this.#routePoints = tripPoints.map(this.#adaptToClient);
     } catch (error) {
-      this.#routePoints = [];
+      this.#isLoadError = true;
     }
 
     try {
       this.#destinations = await this.#apiService.destinations;
     } catch (error) {
-      throw new Error ('Can\'t get routePoint destinations');
+      this.#isLoadError = true;
     }
 
     try {
       this.#offers = await this.#apiService.offers;
     } catch (error) {
-      throw new Error ('Can\'t get routePoint offers');
+      this.#isLoadError = true;
+    }
+
+    if (this.#isLoadError) {
+      this._notify(UpdateType.LOAD_ERROR);
+      return;
     }
 
     this._notify(UpdateType.INIT);

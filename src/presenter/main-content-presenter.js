@@ -6,6 +6,7 @@ import StatisticsView from '../view/statistics-view.js';
 import TripPointPresenter from './trip-point-presenter.js';
 import CreatePointPresenter from './create-point-presenter.js';
 import LoadingView from '../view/loading-view.js';
+import LoadingErrorView from '../view/loading-error-view.js';
 
 import {filter} from '../utils/filter.js';
 import {sortDurationDescending, sortPriceDescending, sortDayAscending, remove} from '../utils/common.js';
@@ -31,6 +32,7 @@ export default class MainContentPresenter {
   #tripPointEmptyComponent = null;
   #tripPointContainerComponent = new TripPointContainerView();
   #loadingComponent = new LoadingView();
+  #loadingErrorComponent = new LoadingErrorView();
   #statisticsComponent = null;
 
   #tripPointPresenter = new Map();
@@ -140,6 +142,9 @@ export default class MainContentPresenter {
       case UpdateType.INIT:
         this.#disablingControlWhileLoadingToggle(LoadStatus.LOADED);
         this.init();
+        break;
+      case UpdateType.LOAD_ERROR:
+        replace(this.#loadingErrorComponent, this.#loadingComponent);
         break;
     }
   }
