@@ -6,8 +6,8 @@ import dayjs from 'dayjs';
 import '../../node_modules/flatpickr/dist/flatpickr.min.css';
 
 const FormStatus = {
-  DESTINATION: false,
-  PRICE_VALID: false,
+  DESTINATION: '',
+  PRICE_VALID: '',
 };
 
 /**
@@ -287,7 +287,6 @@ export default class FormTripPointView extends SmartView {
     } else {
       this.setFormCloseHandler(this._callback.formCloseHandler);
     }
-
   }
 
   setFormCloseHandler = (callbackFunction) => {
