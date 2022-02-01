@@ -36,3 +36,9 @@ export const LoadStatus = {
   LOADING: 'LOADING',
   LOADED: 'LOADED',
 };
+
+export const State = {
+  SAVING: 'SAVING',
+  DELETING: 'DELETING',
+  ABORTING: 'ABORTING',
+};

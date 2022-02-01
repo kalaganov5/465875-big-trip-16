@@ -11,7 +11,7 @@ import LoadingErrorView from '../view/loading-error-view.js';
 import {filter} from '../utils/filter.js';
 import {sortDurationDescending, sortPriceDescending, sortDayAscending, remove} from '../utils/common.js';
 import {RenderPosition, renderElement, replace} from '../utils/render.js';
-import {SortType, UserAction, UpdateType, FilterType, MenuItem, LoadStatus} from '../const.js';
+import {SortType, UserAction, UpdateType, FilterType, MenuItem, LoadStatus, State} from '../const.js';
 
 export default class MainContentPresenter {
   #menuContainer = null;
@@ -113,19 +113,34 @@ export default class MainContentPresenter {
     this.#renderTripPoints();
   }
 
-  #handleViewAction = (actionType, updateType, update) => {
+  #handleViewAction = async (actionType, updateType, update) => {
     // actionType - действие пользователя, нужно чтобы понять, какой метод модели вызвать
     // updateType - тип изменений, нужно чтобы понять, что после нужно обновить
     // update - обновленные данные
     switch (actionType) {
       case (UserAction.UPDATE_ROUTE_POINT):
-        this.#routePointsModel.updateRoutePoints(updateType, update);
+        this.#tripPointPresenter.get(update.id).setViewState(State.SAVING);
+        try {
+          await this.#routePointsModel.updateRoutePoints(updateType, update);
+        } catch (error) {
+          this.#tripPointPresenter.get(update.id).setViewState(State.ABORTING);
+        }
         break;
       case (UserAction.ADD_ROUTE_POINT):
-        this.#routePointsModel.addRoutePoint(updateType, update);
+        this.#tripPointNewPresenter.setSaving();
+        try {
+          await this.#routePointsModel.addRoutePoint(updateType, update);
+        } catch (error) {
+          this.#tripPointNewPresenter.setAborting();
+        }
         break;
       case (UserAction.DELETE_ROUTE_POINT):
-        this.#routePointsModel.deleteRoutePoint(updateType, update);
+        this.#tripPointPresenter.get(update.id).setViewState(State.DELETING);
+        try {
+          this.#routePointsModel.deleteRoutePoint(updateType, update);
+        } catch (error) {
+          this.#tripPointPresenter.get(update.id).setViewState(State.ABORTING);
+        }
     }
   }
 

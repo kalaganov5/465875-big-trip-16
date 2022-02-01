@@ -48,7 +48,8 @@ export default class CreatePointPresenter {
       UpdateType.MAJOR,
       tripPoint,
     );
-    this.destroy();
+    // странно, но ладно, надо проверять
+    // this.destroy();
   }
 
   #formDeleteHandler = () => {
@@ -60,5 +61,24 @@ export default class CreatePointPresenter {
       evt.preventDefault();
       this.destroy();
     }
+  }
+
+  setSaving = () => {
+    this.#tripPointFormComponent.updateData({
+      isDisabled: true,
+      isSaving: true,
+    });
+  }
+
+  setAborting = () => {
+    const resetFormState = () => {
+      this.#tripPointFormComponent.updateData({
+        isDisabled: false,
+        isSaving: false,
+        isDeleting: false,
+      });
+    };
+
+    this.#tripPointFormComponent.shake(resetFormState);
   }
 }

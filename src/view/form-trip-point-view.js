@@ -105,7 +105,9 @@ const createFormPointTemplate = (routePoint, offersTripPoint, isSubmitDisable, r
   const offersTrip = offersTripPoint;
   const cities = routeCities;
   const isSubmitButtonDisable = isSubmitDisable;
-  const {timeStart, timeEnd, type, destination, price, offers, info, isCreateTripPoint} = routePoint;
+  const {timeStart, timeEnd, type, destination, price, offers, info, isCreateTripPoint, isDisabled, isSaving, isDeleting} = routePoint;
+
+  const textDelete = isDeleting ? 'Deleting' : 'Delete';
 
   const typesTripPoint = offersTrip.map((offer) => offer.type);
   let offersCurrentType = [];
@@ -152,9 +154,9 @@ const createFormPointTemplate = (routePoint, offersTripPoint, isSubmitDisable, r
           <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${price}">
         </div>
 
-        <button class="event__save-btn  btn  btn--blue" type="submit" ${isSubmitButtonDisable ? 'disabled' : ''}>Save</button>
-        <button class="event__reset-btn" type="reset">${isCreateTripPoint ? 'Cancel' : 'Delete'}</button>
-        ${isCreateTripPoint ? '' : '<button class="event__rollup-btn" type="button"><span class="visually-hidden">Open event</span></button>'}
+        <button class="event__save-btn  btn  btn--blue" type="submit" ${isSubmitButtonDisable || isDisabled ? 'disabled' : ''}>${isSaving ? 'Saving...' : 'Save'}</button>
+        <button class="event__reset-btn" type="reset" ${isDisabled ? 'disabled' : ''}>${isCreateTripPoint ? 'Cancel' : textDelete}</button>
+        ${isCreateTripPoint ? '' : `<button class="event__rollup-btn" type="button" ${isDisabled ? 'disabled' : ''}><span class="visually-hidden">Open event</span></button>`}
       </header>
       ${offersCurrentType.length > 0 || Object.keys(info).length > 0 ?`<section class="event__details">
         ${setOffersCreatePoint(offersCurrentType, offers)}
@@ -229,11 +231,15 @@ export default class FormTripPointView extends SmartView {
   }
 
   get template() {
-    return createFormPointTemplate(this._data, this.#offersTripPoint, this.#isSubmitDisabled, this.#routeCities);
+    return createFormPointTemplate(this._data, this.#offersTripPoint, this.#isSubmitDisabled, this.#routeCities, true);
   }
 
-  static parseTripPointToData = (tripPoint, isCreateTripPoint) => ({...tripPoint,
+  static parseTripPointToData = (tripPoint, isCreateTripPoint) => ({
+    ...tripPoint,
     isCreateTripPoint,
+    isDisabled: false,
+    isSaving: false,
+    isDeleting: false,
   });
 
   static parseDataToTripPoint = (data) => {
@@ -241,6 +247,9 @@ export default class FormTripPointView extends SmartView {
 
     // delete key
     delete tripPointData.isCreateTripPoint;
+    delete tripPointData.isDisabled;
+    delete tripPointData.isSaving;
+    delete tripPointData.isDeleting;
 
     return tripPointData;
   }
@@ -462,5 +471,8 @@ export default class FormTripPointView extends SmartView {
     isFavorite: false,
     timeStart: dayjs().toDate(),
     timeEnd: dayjs().toDate(),
+    isDisabled: false,
+    isSaving: false,
+    isDeleting: false,
   };
 }
