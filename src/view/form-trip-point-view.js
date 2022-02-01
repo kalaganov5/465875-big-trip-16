@@ -1,6 +1,4 @@
-import {TypeIcons, ROUTE_CITIES, ROUTE_TYPES} from './const.js';
-import {humanReadableDate, setIconUrl, generateSelectCities, firstLetterToUpperCase, checkItemInArray} from './utils.js';
-import {ROUTE_POINT_OFFERS, ROUTES_INFO} from '../mock/const.js';
+import {humanReadableDate, generateSelectCities, firstLetterToUpperCase, checkItemInArray} from './utils.js';
 import SmartView from './smart-view.js';
 import flatpickr from 'flatpickr';
 import dayjs from 'dayjs';
@@ -12,7 +10,8 @@ import '../../node_modules/flatpickr/dist/flatpickr.min.css';
  *
  * @returns выпадающий список способов передвижения
  */
-const generateSelectEventType = (currentType) => {
+const generateSelectEventType = (routeTypes, currentType) => {
+  const ROUTE_TYPES = routeTypes;
   const typesMarkup = Array.from({length: ROUTE_TYPES.length}, (_, index) => (
     `<div class="event__type-item">
       <input id="event-type-${ROUTE_TYPES[index]}-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${ROUTE_TYPES[index]}" ${ROUTE_TYPES[index] === currentType ? 'checked' : ''}>
@@ -98,19 +97,30 @@ const setInfo = (description, images) => {
  * @param {Object} routePoint данные о точке маршрута
  * @returns заполненная форма создания или редактирования точки маршрута
  */
-const createFormPointTemplate = (routePoint) => {
+const createFormPointTemplate = (routePoint, offersTripPoint, destinationsTripPoint, routeCities) => {
+  const offersTrip = offersTripPoint;
+  const cities = routeCities;
   const {timeStart, timeEnd, type, destination, price, offers, info, isCreateTripPoint} = routePoint;
-  const offersCurrentType = ROUTE_POINT_OFFERS[type];
+
+  const typesTripPoint = offersTrip.map((offer) => offer.type);
+  let offersCurrentType = [];
+  for (const offer of offersTrip) {
+    if (offer.type === type) {
+      offersCurrentType = offer.offers;
+      break;
+    }
+  }
+
   return `<li class="trip-events__item">
     <form class="event event--edit" action="#" method="post">
       <header class="event__header">
         <div class="event__type-wrapper">
           <label class="event__type  event__type-btn" for="event-type-toggle-1">
             <span class="visually-hidden">Choose event type</span>
-            <img class="event__type-icon" width="17" height="17" src="${setIconUrl(type, TypeIcons)}" alt="Event type icon">
+            <img class="event__type-icon" width="17" height="17" src="img/icons/${type}.png" alt="Event type icon">
           </label>
           <input class="event__type-toggle  visually-hidden" id="event-type-toggle-1" type="checkbox">
-          ${generateSelectEventType(type)}
+          ${generateSelectEventType(typesTripPoint, type)}
         </div>
 
         <div class="event__field-group  event__field-group--destination">
@@ -118,7 +128,7 @@ const createFormPointTemplate = (routePoint) => {
             ${type}
           </label>
           <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${destination}" list="destination-list-1">
-          ${generateSelectCities(ROUTE_CITIES)}
+          ${generateSelectCities(cities)}
         </div>
 
         <div class="event__field-group  event__field-group--time">
@@ -159,20 +169,34 @@ export default class FormTripPointView extends SmartView {
   #datepickerStart = null;
   #datepickerEnd = null;
 
+  #routeCities = null;
+  #typesTripPoint = null;
+
+  #offersTripPoint = null;
+  #destinationsTripPoint = null;
+
   /**
    * Creates an instance of FormTripPointView.
    * @param {object} tripPoint данные о точке маршрута
    * @param {object} isCreateRoutePointEvent true если это создание новой точки маршрута или false если это редактирование точки маршрута
    * @memberof FormTripPointView
    */
-  constructor(tripPoint) {
+  constructor(tripPoint, offersTripPoint, destinationsTripPoint) {
     super();
     let tripPointData = tripPoint;
     let isCreateRoutePointEvent = false;
+
     if (tripPointData === undefined) {
       tripPointData = this.#tripPointBlank;
       isCreateRoutePointEvent = true;
     }
+
+    this.#offersTripPoint = offersTripPoint;
+    this.#destinationsTripPoint = destinationsTripPoint;
+
+    this.#routeCities = this.#destinationsTripPoint.map((destinationTripPoint) => (destinationTripPoint.name));
+    this.#typesTripPoint = this.#offersTripPoint.map((offer) => offer.type);
+
     this._data = FormTripPointView.parseTripPointToData(tripPointData, isCreateRoutePointEvent);
     this.#setInnerHandlers();
   }
@@ -194,7 +218,7 @@ export default class FormTripPointView extends SmartView {
   }
 
   get template() {
-    return createFormPointTemplate(this._data);
+    return createFormPointTemplate(this._data, this.#offersTripPoint, this.#destinationsTripPoint, this.#routeCities);
   }
 
   static parseTripPointToData = (tripPoint, isCreateTripPoint) => ({...tripPoint,
@@ -268,7 +292,8 @@ export default class FormTripPointView extends SmartView {
 
   #formTypePointHandler = (evt) => {
     evt.preventDefault();
-    const newType = checkItemInArray(ROUTE_TYPES, evt.target.value);
+
+    const newType = checkItemInArray(this.#typesTripPoint, evt.target.value);
 
     this.updateData(
       {
@@ -280,17 +305,19 @@ export default class FormTripPointView extends SmartView {
 
   #formDestinationPointHandler = (evt) => {
     evt.preventDefault();
-    const newDestination = checkItemInArray(ROUTE_CITIES, evt.target.value);
-    if (newDestination === '') {
+
+    const newDestinationData = this.#destinationsTripPoint.find((item) => (item.name === evt.target.value));
+
+    if (newDestinationData.name === '') {
       evt.target.setCustomValidity('Select from the list');
     } else {
       evt.target.setCustomValidity('');
       this.updateData(
         {
-          destination: newDestination,
+          destination: newDestinationData.name,
           info: {
-            description: ROUTES_INFO[newDestination].description,
-            photos: ROUTES_INFO[newDestination].photos
+            description: newDestinationData.description,
+            photos: newDestinationData.pictures
           }
         }
       );
@@ -315,7 +342,10 @@ export default class FormTripPointView extends SmartView {
     evt.preventDefault();
     let pointOffers = [...this._data.offers];
     const changedOfferId = evt.target.dataset.offerId;
-    const changedOffer = ROUTE_POINT_OFFERS[this._data.type].find((offer) => (offer.id === changedOfferId));
+
+    const availableOffers = this.#offersTripPoint.find((offer) => (offer.type === this._data.type)).offers;
+    // console.log(availableOffers)
+    const changedOffer = availableOffers.find((offer) => (+offer.id === +changedOfferId));
 
     if (evt.target.checked) {
       pointOffers.push(changedOffer);

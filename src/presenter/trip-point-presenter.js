@@ -11,6 +11,9 @@ export default class TripPointPresenter {
   #changeData = null;
   #changeMode = null;
 
+  #offersTripPoint = null;
+  #destinationsTripPoint = null;
+
   #tripPointContainer = null;
   #tripPointComponent = null;
   #tripPointFormComponent = null;
@@ -22,10 +25,13 @@ export default class TripPointPresenter {
    * @param {object} tripPoint данные о точки маршрута
    * @memberof TripPointPresenter
    */
-  constructor (tripPointContainer, changeData, changeMode) {
+  constructor (tripPointContainer, changeData, changeMode, offersTripPoint, destinationsTripPoint) {
     this.#tripPointContainer = tripPointContainer;
     this.#changeData = changeData;
     this.#changeMode = changeMode;
+
+    this.#offersTripPoint = offersTripPoint;
+    this.#destinationsTripPoint = destinationsTripPoint;
   }
 
   init = (tripPointItem) => {
@@ -37,7 +43,7 @@ export default class TripPointPresenter {
     this.#tripPointComponent.setEditTripPointHandler(this.#replaceTripPointToForm);
     this.#tripPointComponent.setToggleFavoritePointHandler(this.#toggleFavoritePoint);
 
-    this.#tripPointFormComponent = new FormTripPointView(this.#tripPointData);
+    this.#tripPointFormComponent = new FormTripPointView(this.#tripPointData, this.#offersTripPoint, this.#destinationsTripPoint);
     this.#tripPointFormComponent.setFormCloseHandler(this.#formCloseHandler);
     this.#tripPointFormComponent.setFormSubmitHandler(this.#formSubmitHandler);
     this.#tripPointFormComponent.setDeleteHandler(this.#formDeleteHandler);

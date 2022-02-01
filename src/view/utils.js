@@ -73,7 +73,13 @@ export const firstLetterToUpperCase = (string) => (string[0].toUpperCase() + str
  * @param {*} value проверяемый элемент
  * @returns если значение существует вернёт его
  */
-export const checkItemInArray = (elements, value) => (elements.includes(value) ? value : '');
+export const checkItemInArray = (elements, value) => {
+  for (const element of elements) {
+    if (element.toUpperCase() === value.toUpperCase()) {
+      return value;
+    }
+  }
+};
 
 export const makeItemsUnique = (items) => [...new Set(items)];
 

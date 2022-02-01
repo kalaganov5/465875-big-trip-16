@@ -20,6 +20,9 @@ export default class MainContentPresenter {
   #currentSortType = SortType.DEFAULT;
   #filterType = null;
 
+  #offersTripPoint = null;
+  #destinationsTripPoint = null;
+
   #routePointsModel = null;
   #filterModel = null;
 
@@ -88,6 +91,12 @@ export default class MainContentPresenter {
     this.#filterModel.addObserver(this.#handleModelEvent);
     if (this.#isLoading === LoadStatus.LOADED) {
       this.#filterPresenter.init();
+    }
+
+    if (this.#isLoading === LoadStatus.LOADED &&
+      (this.#offersTripPoint === null || this.#destinationsTripPoint === null)) {
+      this.#offersTripPoint = this.#routePointsModel.offers;
+      this.#destinationsTripPoint = this.#routePointsModel.destinations;
     }
 
     this.#tripPointContainerComponent = new TripPointContainerView();
@@ -192,7 +201,13 @@ export default class MainContentPresenter {
 
   #renderTripPoint = (tripPointItem) => {
     // рендер одной точки маршрута
-    const tripPointPresenter = new TripPointPresenter(this.#tripPointContainerComponent, this.#handleViewAction, this.#handleModeChange);
+    const tripPointPresenter = new TripPointPresenter(
+      this.#tripPointContainerComponent,
+      this.#handleViewAction,
+      this.#handleModeChange,
+      this.#offersTripPoint,
+      this.#destinationsTripPoint
+    );
     tripPointPresenter.init(tripPointItem);
     this.#tripPointPresenter.set(tripPointItem.id, tripPointPresenter);
   }
