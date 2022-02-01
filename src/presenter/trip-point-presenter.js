@@ -112,7 +112,6 @@ export default class TripPointPresenter {
       UpdateType.MAJOR,
       tripPoint,
     );
-    // пусть будет: this.#replaceFormToTripPoint();
   }
 
   #formCloseHandler = () => {

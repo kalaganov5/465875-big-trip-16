@@ -5,7 +5,7 @@ import dayjs from 'dayjs';
 
 import '../../node_modules/flatpickr/dist/flatpickr.min.css';
 
-const FormStatus = {};
+const formStatus = {};
 
 /**
  *
@@ -13,6 +13,7 @@ const FormStatus = {};
  */
 const generateSelectEventType = (routeTypes, currentType) => {
   const ROUTE_TYPES = routeTypes;
+
   const typesMarkup = Array.from({length: ROUTE_TYPES.length}, (_, index) => (
     `<div class="event__type-item">
       <input id="event-type-${ROUTE_TYPES[index]}-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${ROUTE_TYPES[index]}" ${ROUTE_TYPES[index] === currentType ? 'checked' : ''}>
@@ -40,6 +41,7 @@ const setOffersCreatePoint = (offers, offersSelected) => {
 
   const offerMarkup = Array.from({length: offers.length}, (_, index) => {
     const isSelected = offersSelected.some((offer) => (offer.id === offers[index].id));
+
     return `<div class="event__offer-selector">
       <input class="event__offer-checkbox  visually-hidden"
         id="event-offers[index]-${index}"
@@ -75,10 +77,13 @@ const setInfo = (description, images) => {
   if (description === '' && images.length === 0) {
     return '';
   }
+
   const imageLayout = [];
+
   for (const image of images) {
     imageLayout.push(`<img class="event__photo" src="${image.src}" alt="${image.description}"></img>`);
   }
+
   return `
   <section class="event__section  event__section--destination">
   <h3 class="event__section-title  event__section-title--destination">Destination</h3>
@@ -199,8 +204,8 @@ export default class FormTripPointView extends SmartView {
       this.#isSubmitDisabled = true;
     }
 
-    FormStatus.DESTINATION = !isCreateRoutePointEvent;
-    FormStatus.PRICE_VALID = !isCreateRoutePointEvent;
+    formStatus.DESTINATION = !isCreateRoutePointEvent;
+    formStatus.PRICE_VALID = !isCreateRoutePointEvent;
 
     this.#offersTripPoint = offersTripPoint;
     this.#destinationsTripPoint = destinationsTripPoint;
@@ -276,6 +281,7 @@ export default class FormTripPointView extends SmartView {
   restoreHandlers = () => {
     this.#setInnerHandlers();
     this.setFormSubmitHandler(this._callback.formSubmitHandler);
+
     if (this._data.isCreateTripPoint) {
       this.setDeleteHandler(this._callback.formDeleteHandler);
     } else {
@@ -324,11 +330,11 @@ export default class FormTripPointView extends SmartView {
 
     if (newDestinationName === '') {
       evt.target.setCustomValidity('Select from the list');
-      FormStatus.DESTINATION = false;
+      formStatus.DESTINATION = false;
       this.#toggleSubmitButton();
     } else {
       evt.target.setCustomValidity('');
-      FormStatus.DESTINATION = true;
+      formStatus.DESTINATION = true;
 
       this.updateData(
         {
@@ -342,7 +348,7 @@ export default class FormTripPointView extends SmartView {
       );
 
       if (+this._data.price > 0) {
-        FormStatus.PRICE_VALID = true;
+        formStatus.PRICE_VALID = true;
       }
       this.#toggleSubmitButton();
     }
@@ -351,13 +357,16 @@ export default class FormTripPointView extends SmartView {
   #formCostHandler = (evt) => {
     evt.preventDefault();
     const newPrice = Number(evt.target.value);
+
     if (newPrice < 1) {
       evt.target.setCustomValidity('Price must be greater than 0');
-      FormStatus.PRICE_VALID = false;
+      formStatus.PRICE_VALID = false;
       this.#toggleSubmitButton();
+
     } else {
       evt.target.setCustomValidity('');
-      FormStatus.PRICE_VALID = true;
+
+      formStatus.PRICE_VALID = true;
       this.#toggleSubmitButton();
 
       this.updateData(
@@ -391,8 +400,7 @@ export default class FormTripPointView extends SmartView {
       this.element.querySelector('#event-start-time-1'),
       {
         enableTime: true,
-        // eslint-disable-next-line camelcase
-        time_24hr: true,
+        ['time_24hr']: true,
         dateFormat: 'd/m/Y H:i',
         maxDate: flatpickr.parseDate(this._data.timeEnd),
         defaultDate: this._data.timeStart,
@@ -416,8 +424,7 @@ export default class FormTripPointView extends SmartView {
       this.element.querySelector('#event-end-time-1'),
       {
         enableTime: true,
-        // eslint-disable-next-line camelcase
-        time_24hr: true,
+        ['time_24hr']: true,
         dateFormat: 'd/m/Y H:i',
         minDate: flatpickr.parseDate(this._data.timeStart),
         defaultDate: this._data.timeEnd,
@@ -447,7 +454,7 @@ export default class FormTripPointView extends SmartView {
 
   #toggleSubmitButton = () => {
     this.#submitButton = this.element.querySelector('.event__save-btn');
-    if (FormStatus.DESTINATION !== false && FormStatus.PRICE_VALID !== false) {
+    if (formStatus.DESTINATION !== false && formStatus.PRICE_VALID !== false) {
       this.#submitButton.disabled = false;
     } else {
       this.#submitButton.disabled = true;
