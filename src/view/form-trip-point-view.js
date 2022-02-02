@@ -319,7 +319,7 @@ export default class FormTripPointView extends SmartView {
         offers: [],
       }
     );
-    this.#unlockSubmitButton();
+    this.unlockSubmitButton();
   }
 
   #formDestinationPointHandler = (evt) => {
@@ -342,7 +342,7 @@ export default class FormTripPointView extends SmartView {
           },
         }
       );
-      this.#unlockSubmitButton();
+      this.unlockSubmitButton();
     }
   }
 
@@ -355,7 +355,7 @@ export default class FormTripPointView extends SmartView {
 
     } else {
       evt.target.setCustomValidity('');
-      this.#unlockSubmitButton();
+      this.unlockSubmitButton();
 
       this.updateData(
         {price: +evt.target.value,},
@@ -456,7 +456,7 @@ export default class FormTripPointView extends SmartView {
     return true;
   }
 
-  #unlockSubmitButton = () =>  {
+  unlockSubmitButton = () =>  {
     this.#submitButton = this.element.querySelector('.event__save-btn');
     this.#submitButton.disabled = false;
   }

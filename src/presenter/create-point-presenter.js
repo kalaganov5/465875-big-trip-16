@@ -77,6 +77,7 @@ export default class CreatePointPresenter {
         isSaving: false,
         isDeleting: false,
       });
+      this.#tripPointFormComponent.unlockSubmitButton();
     };
 
     this.#tripPointFormComponent.shake(resetFormState);
