@@ -33,7 +33,10 @@ export default class AbstractView {
 
     setTimeout(() => {
       this.element.style.animation = '';
-      callback();
+
+      if (typeof(callback) === 'function') {
+        callback();
+      }
     }, SHAKE_ANIMATION_TIMEOUT);
   }
 }
