@@ -230,7 +230,7 @@ export default class FormTripPointView extends SmartView {
   }
 
   get template() {
-    return createFormPointTemplate(this._data, this.#offersTripPoint, this.#isSubmitDisabled, this.#routeCities, true);
+    return createFormPointTemplate(this._data, this.#offersTripPoint, this.#isSubmitDisabled, this.#routeCities);
   }
 
   static parseTripPointToData = (tripPoint, isCreateTripPoint) => ({
