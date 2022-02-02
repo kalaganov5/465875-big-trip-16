@@ -5,8 +5,6 @@ import dayjs from 'dayjs';
 
 import '../../node_modules/flatpickr/dist/flatpickr.min.css';
 
-const formStatus = {};
-
 /**
  *
  * @returns выпадающий список способов передвижения
@@ -187,6 +185,10 @@ export default class FormTripPointView extends SmartView {
   #submitButton = null;
   #isSubmitDisabled = null;
 
+  // input form
+  #inputDestination = null;
+  #inputPrice = null;
+
   /**
    * Creates an instance of FormTripPointView.
    * @param {object} tripPoint данные о точке маршрута
@@ -203,9 +205,6 @@ export default class FormTripPointView extends SmartView {
       isCreateRoutePointEvent = true;
       this.#isSubmitDisabled = true;
     }
-
-    formStatus.DESTINATION = !isCreateRoutePointEvent;
-    formStatus.PRICE_VALID = !isCreateRoutePointEvent;
 
     this.#offersTripPoint = offersTripPoint;
     this.#destinationsTripPoint = destinationsTripPoint;
@@ -256,17 +255,17 @@ export default class FormTripPointView extends SmartView {
   #setInnerHandlers = () => {
     this.element.querySelector('.event__type-group')
       .addEventListener('change', this.#formTypePointHandler);
-    this.element.querySelector('.event__input--destination')
-      .addEventListener('change', this.#formDestinationPointHandler);
+    this.#inputDestination = this.element.querySelector('.event__input--destination');
+    this.#inputDestination.addEventListener('change', this.#formDestinationPointHandler);
 
     const offersElement = this.element.querySelector('.event__available-offers');
     if (offersElement) {
       offersElement.addEventListener('change', this.#formOffersPointHandler);
     }
 
-    const inputPrice = this.element.querySelector('.event__input--price');
-    inputPrice.type = 'number';
-    inputPrice.addEventListener('input', this.#formCostHandler);
+    this.#inputPrice = this.element.querySelector('.event__input--price');
+    this.#inputPrice.type = 'number';
+    this.#inputPrice.addEventListener('input', this.#formCostHandler);
 
     this.#setDatepickerStart();
     this.#setDatepickerEnd();
@@ -281,10 +280,9 @@ export default class FormTripPointView extends SmartView {
   restoreHandlers = () => {
     this.#setInnerHandlers();
     this.setFormSubmitHandler(this._callback.formSubmitHandler);
+    this.setDeleteHandler(this._callback.formDeleteHandler);
 
-    if (this._data.isCreateTripPoint) {
-      this.setDeleteHandler(this._callback.formDeleteHandler);
-    } else {
+    if (!this._data.isCreateTripPoint) {
       this.setFormCloseHandler(this._callback.formCloseHandler);
     }
   }
@@ -306,12 +304,13 @@ export default class FormTripPointView extends SmartView {
 
   #formSubmitHandler = (evt) => {
     evt.preventDefault();
-    this._callback.formSubmitHandler(FormTripPointView.parseDataToTripPoint(this._data));
+    if (this.#validationForm()) {
+      this._callback.formSubmitHandler(FormTripPointView.parseDataToTripPoint(this._data));
+    }
   }
 
   #formTypePointHandler = (evt) => {
     evt.preventDefault();
-
     const newType = checkItemInArray(this.#typesTripPoint, evt.target.value);
 
     this.updateData(
@@ -320,6 +319,7 @@ export default class FormTripPointView extends SmartView {
         offers: [],
       }
     );
+    this.unlockSubmitButton();
   }
 
   #formDestinationPointHandler = (evt) => {
@@ -330,11 +330,8 @@ export default class FormTripPointView extends SmartView {
 
     if (newDestinationName === '') {
       evt.target.setCustomValidity('Select from the list');
-      formStatus.DESTINATION = false;
-      this.#toggleSubmitButton();
     } else {
       evt.target.setCustomValidity('');
-      formStatus.DESTINATION = true;
 
       this.updateData(
         {
@@ -343,14 +340,9 @@ export default class FormTripPointView extends SmartView {
             description: newDestinationData.description,
             photos: newDestinationData.pictures
           },
-          price: +this._data.price,
         }
       );
-
-      if (+this._data.price > 0) {
-        formStatus.PRICE_VALID = true;
-      }
-      this.#toggleSubmitButton();
+      this.unlockSubmitButton();
     }
   }
 
@@ -360,14 +352,10 @@ export default class FormTripPointView extends SmartView {
 
     if (newPrice < 1) {
       evt.target.setCustomValidity('Price must be greater than 0');
-      formStatus.PRICE_VALID = false;
-      this.#toggleSubmitButton();
 
     } else {
       evt.target.setCustomValidity('');
-
-      formStatus.PRICE_VALID = true;
-      this.#toggleSubmitButton();
+      this.unlockSubmitButton();
 
       this.updateData(
         {price: +evt.target.value,},
@@ -452,13 +440,25 @@ export default class FormTripPointView extends SmartView {
     this._callback.formDeleteHandler();
   }
 
-  #toggleSubmitButton = () => {
-    this.#submitButton = this.element.querySelector('.event__save-btn');
-    if (formStatus.DESTINATION !== false && formStatus.PRICE_VALID !== false) {
-      this.#submitButton.disabled = false;
-    } else {
-      this.#submitButton.disabled = true;
+  #validationForm = () => {
+    if (this._data.price < 1) {
+      this.#inputPrice.setCustomValidity('Price must be greater than 0');
+      this.#inputPrice.focus();
+      return false;
     }
+
+    if (this._data.destination === '') {
+      this.#inputDestination.setCustomValidity('Select from the list');
+      this.#inputDestination.focus();
+      return false;
+    }
+
+    return true;
+  }
+
+  unlockSubmitButton = () =>  {
+    this.#submitButton = this.element.querySelector('.event__save-btn');
+    this.#submitButton.disabled = false;
   }
 
   #tripPointBlank = {
