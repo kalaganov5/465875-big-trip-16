@@ -128,6 +128,11 @@ export default class TripPointPresenter {
 
   setViewState = (state) => {
     if (this.#mode === Mode.DEFAULT) {
+      switch (state) {
+        case State.ABORTING:
+          this.#tripPointComponent.shake();
+          break;
+      }
       return;
     }
 
