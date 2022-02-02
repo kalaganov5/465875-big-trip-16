@@ -1,6 +1,6 @@
 import MainContentPresenter from './presenter/main-content-presenter.js';
 import RoutePointsModel from './model/route-points-model.js';
-import FilterTripPointsModel from './model/filter-trip-point-model.js';
+import FilterTripPointsModel from './model/filter-trip-points-model.js';
 import FilterTripPointPresenter from './presenter/filter-trip-point-presenter.js';
 import ApiService from './api-service.js';
 
