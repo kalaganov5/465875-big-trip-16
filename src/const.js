@@ -12,7 +12,7 @@ export const UpdateType = {
   MINOR: 'MINOR',
   MAJOR: 'MAJOR',
   INIT: 'INIT',
-  LOAD_ERROR: 'LOAD_ERROR'
+  LOAD_ERROR: 'LOAD_ERROR',
 };
 
 export const SortType = {

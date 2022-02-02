@@ -24,9 +24,7 @@ const createLeadingZero = (number) => (number <= 9 ? `0${number}` : number);
 export const calculateDate = (dateA, dateB) => {
   const durationMinutes = dayjs(dateB).diff(dateA, 'minute');
   const day = Math.trunc(durationMinutes / DAY_OF_MINUTES);
-  const hour = Math.trunc(
-    (durationMinutes % DAY_OF_MINUTES) / HOUR_OF_MINUTES
-  );
+  const hour = Math.trunc((durationMinutes % DAY_OF_MINUTES) / HOUR_OF_MINUTES);
   const minute = (durationMinutes % DAY_OF_MINUTES) % HOUR_OF_MINUTES;
 
   return {
@@ -114,9 +112,7 @@ export const timeByType = (tripPoints, type) => {
 
 export const minutesToHumanFormat = (minutes) => {
   const day = Math.trunc(minutes / DAY_OF_MINUTES);
-  const hour = Math.trunc(
-    (minutes % DAY_OF_MINUTES) / HOUR_OF_MINUTES
-  );
+  const hour = Math.trunc((minutes % DAY_OF_MINUTES) / HOUR_OF_MINUTES);
   const minute = (minutes % DAY_OF_MINUTES) % HOUR_OF_MINUTES;
 
   return {
