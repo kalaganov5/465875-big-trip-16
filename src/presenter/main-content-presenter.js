@@ -6,11 +6,12 @@ import StatisticsView from '../view/statistics-view.js';
 import TripPointPresenter from './trip-point-presenter.js';
 import CreatePointPresenter from './create-point-presenter.js';
 import LoadingView from '../view/loading-view.js';
+import LoadingErrorView from '../view/loading-error-view.js';
 
 import {filter} from '../utils/filter.js';
 import {sortDurationDescending, sortPriceDescending, sortDayAscending, remove} from '../utils/common.js';
 import {RenderPosition, renderElement, replace} from '../utils/render.js';
-import {SortType, UserAction, UpdateType, FilterType, MenuItem, LoadStatus} from '../const.js';
+import {SortType, UserAction, UpdateType, FilterType, MenuItem, LoadStatus, State} from '../const.js';
 
 export default class MainContentPresenter {
   #menuContainer = null;
@@ -31,6 +32,7 @@ export default class MainContentPresenter {
   #tripPointEmptyComponent = null;
   #tripPointContainerComponent = new TripPointContainerView();
   #loadingComponent = new LoadingView();
+  #loadingErrorComponent = new LoadingErrorView();
   #statisticsComponent = null;
 
   #tripPointPresenter = new Map();
@@ -55,6 +57,7 @@ export default class MainContentPresenter {
     this.#routePointsModel = routePointsModel;
     this.#routePointsModel.addObserver(this.#handleModelEvent);
     this.#routePointsModel.init();
+
     this.#disablingControlWhileLoadingToggle(this.#isLoading);
 
     this.#filterModel = filterModel;
@@ -66,14 +69,18 @@ export default class MainContentPresenter {
 
   get routePoints() {
     this.#filterType = this.#filterModel.filterType;
+
     const routePoints = this.#routePointsModel.routePoints;
     const filteredRoutePoints = filter[this.#filterType](routePoints);
+
     switch (this.#currentSortType) {
       case SortType.PRICE:
         return filteredRoutePoints.sort(sortPriceDescending);
+
       case SortType.TIME:
         return filteredRoutePoints.sort(sortDurationDescending);
     }
+
     return filteredRoutePoints.sort(sortDayAscending);
   }
 
@@ -111,19 +118,36 @@ export default class MainContentPresenter {
     this.#renderTripPoints();
   }
 
-  #handleViewAction = (actionType, updateType, update) => {
-    // actionType - действие пользователя, нужно чтобы понять, какой метод модели вызвать
-    // updateType - тип изменений, нужно чтобы понять, что после нужно обновить
-    // update - обновленные данные
+  #handleViewAction = async (actionType, updateType, update) => {
     switch (actionType) {
       case (UserAction.UPDATE_ROUTE_POINT):
-        this.#routePointsModel.updateRoutePoints(updateType, update);
+        this.#tripPointPresenter.get(update.id).setViewState(State.SAVING);
+
+        try {
+          await this.#routePointsModel.updateRoutePoints(updateType, update);
+        } catch (error) {
+          this.#tripPointPresenter.get(update.id).setViewState(State.ABORTING);
+        }
         break;
+
       case (UserAction.ADD_ROUTE_POINT):
-        this.#routePointsModel.addRoutePoint(updateType, update);
+        this.#tripPointNewPresenter.setSaving();
+
+        try {
+          await this.#routePointsModel.addRoutePoint(updateType, update);
+        } catch (error) {
+          this.#tripPointNewPresenter.setAborting();
+        }
         break;
+
       case (UserAction.DELETE_ROUTE_POINT):
-        this.#routePointsModel.deleteRoutePoint(updateType, update);
+        this.#tripPointPresenter.get(update.id).setViewState(State.DELETING);
+
+        try {
+          this.#routePointsModel.deleteRoutePoint(updateType, update);
+        } catch (error) {
+          this.#tripPointPresenter.get(update.id).setViewState(State.ABORTING);
+        }
     }
   }
 
@@ -132,14 +156,20 @@ export default class MainContentPresenter {
       case (UpdateType.MINOR):
         this.#tripPointPresenter.get(data.id).init(data);
         break;
+
       case UpdateType.MAJOR:
         this.#clearContent();
         this.#currentSortType = SortType.DEFAULT;
         this.init();
         break;
+
       case UpdateType.INIT:
         this.#disablingControlWhileLoadingToggle(LoadStatus.LOADED);
         this.init();
+        break;
+
+      case UpdateType.LOAD_ERROR:
+        replace(this.#loadingErrorComponent, this.#loadingComponent);
         break;
     }
   }
@@ -163,8 +193,14 @@ export default class MainContentPresenter {
         break;
       case MenuItem.STATISTICS:
         this.#currentMenuItem = currentMenuItem;
+
         this.#filterPresenter.destroy();
         this.#filterModel.removeObserver(this.#handleModelEvent);
+        // Возвращаем стартовый тип фильтра
+        this.#filterModel.setFilterType(FilterType.EVERYTHING);
+
+        // Возвращаем стартовый тип сортировки
+        this.#currentSortType = SortType.DEFAULT;
 
         remove(this.#tripPointContainerComponent);
         this.#clearContent();
@@ -252,21 +288,25 @@ export default class MainContentPresenter {
   #createTripPoint = () => {
     this.#currentSortType = SortType.DEFAULT;
     this.#filterModel.setFilter(UpdateType.MAJOR, FilterType.EVERYTHING);
+
     if (this.#tripPointEmptyComponent !== null) {
       replace(this.#tripPointContainerComponent, this.#tripPointEmptyComponent);
       this.#tripPointEmptyComponent = null;
     }
+
     this.#tripPointNewPresenter.init();
   }
 
   #addTripPointButtonHandler = () => {
     this.#addNewTripPointButton.addEventListener('click', (evt) => {
       evt.preventDefault();
+
       if (this.#currentMenuItem === MenuItem.STATISTICS) {
         this.#currentMenuItem = MenuItem.TRIP_POINTS;
         this.#menuComponent.toggleMenu(this.#currentMenuItem);
         this.init();
       }
+
       this.#createTripPoint();
     });
   }

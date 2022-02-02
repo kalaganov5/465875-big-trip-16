@@ -68,5 +68,6 @@ export const sortPriceDescending = (tripPointA, tripPointB) => (tripPointB.price
 export const sortDayAscending = (tripPointA, tripPointB) => {
   const tripPointDayA = tripPointA.timeStart;
   const tripPointDayB = tripPointB.timeStart;
+
   return dayjs(tripPointDayA).diff(tripPointDayB);
 };

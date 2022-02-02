@@ -22,9 +22,11 @@ export default class CreatePointPresenter {
 
   init = () => {
     this.#addNewPointButton.disabled = true;
+
     this.#tripPointFormComponent = new FormTripPointView(undefined, this.#offersTripPoint, this.#destinationsTripPoint);
     this.#tripPointFormComponent.setFormSubmitHandler(this.#formSubmitHandler);
     this.#tripPointFormComponent.setDeleteHandler(this.#formDeleteHandler);
+
     renderElement(this.#tripPointContainer, this.#tripPointFormComponent, RenderPosition.AFTERBEGIN);
 
     document.addEventListener('keydown', this.#onEscKeyDown);
@@ -48,7 +50,6 @@ export default class CreatePointPresenter {
       UpdateType.MAJOR,
       tripPoint,
     );
-    this.destroy();
   }
 
   #formDeleteHandler = () => {
@@ -60,5 +61,24 @@ export default class CreatePointPresenter {
       evt.preventDefault();
       this.destroy();
     }
+  }
+
+  setSaving = () => {
+    this.#tripPointFormComponent.updateData({
+      isDisabled: true,
+      isSaving: true,
+    });
+  }
+
+  setAborting = () => {
+    const resetFormState = () => {
+      this.#tripPointFormComponent.updateData({
+        isDisabled: false,
+        isSaving: false,
+        isDeleting: false,
+      });
+    };
+
+    this.#tripPointFormComponent.shake(resetFormState);
   }
 }

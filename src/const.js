@@ -12,6 +12,7 @@ export const UpdateType = {
   MINOR: 'MINOR',
   MAJOR: 'MAJOR',
   INIT: 'INIT',
+  LOAD_ERROR: 'LOAD_ERROR'
 };
 
 export const SortType = {
@@ -34,4 +35,10 @@ export const MenuItem = {
 export const LoadStatus = {
   LOADING: 'LOADING',
   LOADED: 'LOADED',
+};
+
+export const State = {
+  SAVING: 'SAVING',
+  DELETING: 'DELETING',
+  ABORTING: 'ABORTING',
 };

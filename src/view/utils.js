@@ -28,6 +28,7 @@ export const calculateDate = (dateA, dateB) => {
     (durationMinutes % DAY_OF_MINUTES) / HOUR_OF_MINUTES
   );
   const minute = (durationMinutes % DAY_OF_MINUTES) % HOUR_OF_MINUTES;
+
   return {
     day: createLeadingZero(day),
     hour: createLeadingZero(hour),
@@ -53,6 +54,7 @@ export const generateSelectCities = (cities) => {
   for (const city of cities) {
     citiesLayout.push(`<option value="${city}"></option>`);
   }
+
   return `
     <datalist id="destination-list-1">
       ${citiesLayout.join('')}
@@ -116,6 +118,7 @@ export const minutesToHumanFormat = (minutes) => {
     (minutes % DAY_OF_MINUTES) / HOUR_OF_MINUTES
   );
   const minute = (minutes % DAY_OF_MINUTES) % HOUR_OF_MINUTES;
+
   return {
     day: createLeadingZero(day),
     hour: createLeadingZero(hour),

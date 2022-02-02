@@ -161,10 +161,11 @@ export default class StatisticsView extends AbstractView {
       .map((type) => ({[type]: countTripPointsByType(this.#routePoints, type)}))
       .sort((itemA, itemB) => (Object.values(itemB)[0] - Object.values(itemA)[0]));
 
-    typeCtx.height = this.#BAR_HEIGHT * tripPointByTypeCounts.length;
-
     const sortedTypes = [];
     const sortedTypeCounts = [];
+
+    typeCtx.height = this.#BAR_HEIGHT * tripPointByTypeCounts.length;
+
     for (const item of tripPointByTypeCounts) {
       sortedTypes.push(Object.keys(item)[0].toUpperCase());
       sortedTypeCounts.push(Object.values(item)[0]);
@@ -247,7 +248,6 @@ export default class StatisticsView extends AbstractView {
       .map((type) => ({[type]: timeByType(this.#routePoints, type)}))
       .sort((itemA, itemB) => (Object.values(itemB)[0] - Object.values(itemA)[0]));
 
-    // расчет высоты канваса
     timeByTypeCtx.height = this.#BAR_HEIGHT * tripPointByTypeTime.length;
 
     const sortedTypes = [];

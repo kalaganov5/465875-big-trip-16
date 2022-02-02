@@ -4,7 +4,7 @@ import FormTripPointView from '../view/form-trip-point-view.js';
 import {renderElement, replace, RenderPosition} from '../utils/render.js';
 import {remove} from '../utils/common.js';
 import {Mode} from './const.js';
-import {UserAction, UpdateType} from '../const.js';
+import {UserAction, UpdateType, State} from '../const.js';
 
 export default class TripPointPresenter {
   #tripPointData = null;
@@ -59,6 +59,7 @@ export default class TripPointPresenter {
 
     if (this.#mode === Mode.EDITING) {
       replace(this.#tripPointFormComponent, prevTripPointFormComponent);
+      this.#mode = Mode.DEFAULT;
     }
 
     remove(prevTripPointFormComponent);
@@ -111,7 +112,6 @@ export default class TripPointPresenter {
       UpdateType.MAJOR,
       tripPoint,
     );
-    this.#replaceFormToTripPoint();
   }
 
   #formCloseHandler = () => {
@@ -124,5 +124,40 @@ export default class TripPointPresenter {
       UpdateType.MAJOR,
       this.#tripPointData,
     );
+  }
+
+  setViewState = (state) => {
+    if (this.#mode === Mode.DEFAULT) {
+      return;
+    }
+
+    const resetFormState = () => {
+      this.#tripPointFormComponent.updateData({
+        isDisabled: false,
+        isSaving: false,
+        isDeleting: false,
+      });
+    };
+
+    switch (state) {
+      case State.SAVING:
+        this.#tripPointFormComponent.updateData({
+          isDisabled: true,
+          isSaving: true,
+        });
+        break;
+
+      case State.DELETING:
+        this.#tripPointFormComponent.updateData({
+          isDisabled: true,
+          isDeleting: true,
+        });
+        break;
+
+      case State.ABORTING:
+        this.#tripPointComponent.shake(resetFormState);
+        this.#tripPointFormComponent.shake(resetFormState);
+        break;
+    }
   }
 }

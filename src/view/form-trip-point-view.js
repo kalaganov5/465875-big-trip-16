@@ -5,10 +5,7 @@ import dayjs from 'dayjs';
 
 import '../../node_modules/flatpickr/dist/flatpickr.min.css';
 
-const FormStatus = {
-  DESTINATION: false,
-  PRICE_VALID: false,
-};
+const formStatus = {};
 
 /**
  *
@@ -16,6 +13,7 @@ const FormStatus = {
  */
 const generateSelectEventType = (routeTypes, currentType) => {
   const ROUTE_TYPES = routeTypes;
+
   const typesMarkup = Array.from({length: ROUTE_TYPES.length}, (_, index) => (
     `<div class="event__type-item">
       <input id="event-type-${ROUTE_TYPES[index]}-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${ROUTE_TYPES[index]}" ${ROUTE_TYPES[index] === currentType ? 'checked' : ''}>
@@ -43,6 +41,7 @@ const setOffersCreatePoint = (offers, offersSelected) => {
 
   const offerMarkup = Array.from({length: offers.length}, (_, index) => {
     const isSelected = offersSelected.some((offer) => (offer.id === offers[index].id));
+
     return `<div class="event__offer-selector">
       <input class="event__offer-checkbox  visually-hidden"
         id="event-offers[index]-${index}"
@@ -78,10 +77,13 @@ const setInfo = (description, images) => {
   if (description === '' && images.length === 0) {
     return '';
   }
+
   const imageLayout = [];
+
   for (const image of images) {
     imageLayout.push(`<img class="event__photo" src="${image.src}" alt="${image.description}"></img>`);
   }
+
   return `
   <section class="event__section  event__section--destination">
   <h3 class="event__section-title  event__section-title--destination">Destination</h3>
@@ -105,7 +107,9 @@ const createFormPointTemplate = (routePoint, offersTripPoint, isSubmitDisable, r
   const offersTrip = offersTripPoint;
   const cities = routeCities;
   const isSubmitButtonDisable = isSubmitDisable;
-  const {timeStart, timeEnd, type, destination, price, offers, info, isCreateTripPoint} = routePoint;
+  const {timeStart, timeEnd, type, destination, price, offers, info, isCreateTripPoint, isDisabled, isSaving, isDeleting} = routePoint;
+
+  const textDelete = isDeleting ? 'Deleting' : 'Delete';
 
   const typesTripPoint = offersTrip.map((offer) => offer.type);
   let offersCurrentType = [];
@@ -152,9 +156,9 @@ const createFormPointTemplate = (routePoint, offersTripPoint, isSubmitDisable, r
           <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${price}">
         </div>
 
-        <button class="event__save-btn  btn  btn--blue" type="submit" ${isSubmitButtonDisable ? 'disabled' : ''}>Save</button>
-        <button class="event__reset-btn" type="reset">${isCreateTripPoint ? 'Cancel' : 'Delete'}</button>
-        ${isCreateTripPoint ? '' : '<button class="event__rollup-btn" type="button"><span class="visually-hidden">Open event</span></button>'}
+        <button class="event__save-btn  btn  btn--blue" type="submit" ${isSubmitButtonDisable || isDisabled ? 'disabled' : ''}>${isSaving ? 'Saving...' : 'Save'}</button>
+        <button class="event__reset-btn" type="reset" ${isDisabled ? 'disabled' : ''}>${isCreateTripPoint ? 'Cancel' : textDelete}</button>
+        ${isCreateTripPoint ? '' : `<button class="event__rollup-btn" type="button" ${isDisabled ? 'disabled' : ''}><span class="visually-hidden">Open event</span></button>`}
       </header>
       ${offersCurrentType.length > 0 || Object.keys(info).length > 0 ?`<section class="event__details">
         ${setOffersCreatePoint(offersCurrentType, offers)}
@@ -200,8 +204,8 @@ export default class FormTripPointView extends SmartView {
       this.#isSubmitDisabled = true;
     }
 
-    FormStatus.DESTINATION = !isCreateRoutePointEvent;
-    FormStatus.PRICE_VALID = !isCreateRoutePointEvent;
+    formStatus.DESTINATION = !isCreateRoutePointEvent;
+    formStatus.PRICE_VALID = !isCreateRoutePointEvent;
 
     this.#offersTripPoint = offersTripPoint;
     this.#destinationsTripPoint = destinationsTripPoint;
@@ -212,8 +216,6 @@ export default class FormTripPointView extends SmartView {
     this.#setInnerHandlers();
   }
 
-  // Перегружаем метод родителя removeElement,
-  // чтобы при удалении удалялся более не нужный календарь
   removeElement = () => {
     super.removeElement();
 
@@ -229,18 +231,24 @@ export default class FormTripPointView extends SmartView {
   }
 
   get template() {
-    return createFormPointTemplate(this._data, this.#offersTripPoint, this.#isSubmitDisabled, this.#routeCities);
+    return createFormPointTemplate(this._data, this.#offersTripPoint, this.#isSubmitDisabled, this.#routeCities, true);
   }
 
-  static parseTripPointToData = (tripPoint, isCreateTripPoint) => ({...tripPoint,
+  static parseTripPointToData = (tripPoint, isCreateTripPoint) => ({
+    ...tripPoint,
     isCreateTripPoint,
+    isDisabled: false,
+    isSaving: false,
+    isDeleting: false,
   });
 
   static parseDataToTripPoint = (data) => {
     const tripPointData = {...data};
 
-    // delete key
     delete tripPointData.isCreateTripPoint;
+    delete tripPointData.isDisabled;
+    delete tripPointData.isSaving;
+    delete tripPointData.isDeleting;
 
     return tripPointData;
   }
@@ -273,12 +281,12 @@ export default class FormTripPointView extends SmartView {
   restoreHandlers = () => {
     this.#setInnerHandlers();
     this.setFormSubmitHandler(this._callback.formSubmitHandler);
+
     if (this._data.isCreateTripPoint) {
       this.setDeleteHandler(this._callback.formDeleteHandler);
     } else {
       this.setFormCloseHandler(this._callback.formCloseHandler);
     }
-
   }
 
   setFormCloseHandler = (callbackFunction) => {
@@ -319,13 +327,15 @@ export default class FormTripPointView extends SmartView {
 
     const newDestinationData = this.#destinationsTripPoint.find((item) => (item.name === evt.target.value));
     const newDestinationName = typeof newDestinationData === 'object' ? newDestinationData.name : '';
+
     if (newDestinationName === '') {
       evt.target.setCustomValidity('Select from the list');
-      FormStatus.DESTINATION = false;
+      formStatus.DESTINATION = false;
       this.#toggleSubmitButton();
     } else {
       evt.target.setCustomValidity('');
-      FormStatus.DESTINATION = true;
+      formStatus.DESTINATION = true;
+
       this.updateData(
         {
           destination: newDestinationData.name,
@@ -336,8 +346,9 @@ export default class FormTripPointView extends SmartView {
           price: +this._data.price,
         }
       );
+
       if (+this._data.price > 0) {
-        FormStatus.PRICE_VALID = true;
+        formStatus.PRICE_VALID = true;
       }
       this.#toggleSubmitButton();
     }
@@ -346,13 +357,16 @@ export default class FormTripPointView extends SmartView {
   #formCostHandler = (evt) => {
     evt.preventDefault();
     const newPrice = Number(evt.target.value);
+
     if (newPrice < 1) {
       evt.target.setCustomValidity('Price must be greater than 0');
-      FormStatus.PRICE_VALID = false;
+      formStatus.PRICE_VALID = false;
       this.#toggleSubmitButton();
+
     } else {
       evt.target.setCustomValidity('');
-      FormStatus.PRICE_VALID = true;
+
+      formStatus.PRICE_VALID = true;
       this.#toggleSubmitButton();
 
       this.updateData(
@@ -365,11 +379,10 @@ export default class FormTripPointView extends SmartView {
   #formOffersPointHandler = (evt) => {
     evt.preventDefault();
     let pointOffers = [...this._data.offers];
-    const changedOfferId = evt.target.dataset.offerId;
-
+    const changedOfferId = +evt.target.dataset.offerId;
     const availableOffers = this.#offersTripPoint.find((offer) => (offer.type === this._data.type)).offers;
 
-    const changedOffer = availableOffers.find((offer) => (+offer.id === +changedOfferId));
+    const changedOffer = availableOffers.find((offer) => (offer.id === changedOfferId));
 
     if (evt.target.checked) {
       pointOffers.push(changedOffer);
@@ -387,8 +400,7 @@ export default class FormTripPointView extends SmartView {
       this.element.querySelector('#event-start-time-1'),
       {
         enableTime: true,
-        // eslint-disable-next-line camelcase
-        time_24hr: true,
+        ['time_24hr']: true,
         dateFormat: 'd/m/Y H:i',
         maxDate: flatpickr.parseDate(this._data.timeEnd),
         defaultDate: this._data.timeStart,
@@ -412,8 +424,7 @@ export default class FormTripPointView extends SmartView {
       this.element.querySelector('#event-end-time-1'),
       {
         enableTime: true,
-        // eslint-disable-next-line camelcase
-        time_24hr: true,
+        ['time_24hr']: true,
         dateFormat: 'd/m/Y H:i',
         minDate: flatpickr.parseDate(this._data.timeStart),
         defaultDate: this._data.timeEnd,
@@ -443,7 +454,7 @@ export default class FormTripPointView extends SmartView {
 
   #toggleSubmitButton = () => {
     this.#submitButton = this.element.querySelector('.event__save-btn');
-    if (FormStatus.DESTINATION !== false && FormStatus.PRICE_VALID !== false) {
+    if (formStatus.DESTINATION !== false && formStatus.PRICE_VALID !== false) {
       this.#submitButton.disabled = false;
     } else {
       this.#submitButton.disabled = true;
@@ -462,5 +473,8 @@ export default class FormTripPointView extends SmartView {
     isFavorite: false,
     timeStart: dayjs().toDate(),
     timeEnd: dayjs().toDate(),
+    isDisabled: false,
+    isSaving: false,
+    isDeleting: false,
   };
 }

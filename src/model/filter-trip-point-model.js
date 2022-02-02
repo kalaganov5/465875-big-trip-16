@@ -8,6 +8,10 @@ export default class FilterTripPointsModel extends AbstractObservable {
     return this.#filter;
   }
 
+  setFilterType = (filterType) => {
+    this.#filter = filterType;
+  }
+
   setFilter = (updateType, filterType) => {
     this.#filter = filterType;
     this._notify(updateType, filterType);
