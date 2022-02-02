@@ -1,6 +1,6 @@
+import FormTripPointView from '../view/form-trip-point-view.js';
 import {renderElement, RenderPosition} from '../utils/render.js';
 import {UserAction, UpdateType} from '../const.js';
-import FormTripPointView from '../view/form-trip-point-view.js';
 import {remove} from '../utils/common.js';
 
 export default class CreatePointPresenter {
