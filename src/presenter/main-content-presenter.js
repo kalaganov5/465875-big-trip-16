@@ -144,7 +144,7 @@ export default class MainContentPresenter {
         this.#tripPointPresenter.get(update.id).setViewState(State.DELETING);
 
         try {
-          this.#routePointsModel.deleteRoutePoint(updateType, update);
+          await this.#routePointsModel.deleteRoutePoint(updateType, update);
         } catch (error) {
           this.#tripPointPresenter.get(update.id).setViewState(State.ABORTING);
         }
